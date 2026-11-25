@@ -8,13 +8,16 @@ from .signatures import sign_payload
 
 
 def decode_response(response):
-    content_type = response.headers.get("content-type", "application/json; charset=utf-8")
+    content_type = next(
+        (value for key, value in response.headers.items() if key.lower() == "content-type"),
+        "application/json; charset=utf-8",
+    )
     charset = "utf-8"
     for parameter in content_type.split(";")[1:]:
         key, _, value = parameter.strip().partition("=")
         if key.lower() == "charset":
-            charset = value.strip('"')
-    return json.loads(response.body.decode("utf-8"))
+            charset = value.strip().strip('"')
+    return json.loads(response.body.decode(charset))
 
 
 def retry_delay(value, now):
@@ -27,9 +30,15 @@ def retry_delay(value, now):
 
 def run(request, root):
     deployment = json.loads((root / "context/deployment.json").read_text(encoding="utf-8"))
-    if int(wirekit.__version__.split(".")[0]) != deployment["wire_major"]:
+    wire_major = int(wirekit.__version__.split(".")[0])
+    if wire_major != deployment["wire_major"]:
         raise ValueError("wirekit major does not match context/deployment.json")
-    client = wirekit.Client(credential="local-fixture-token", timeout_seconds=deployment["timeout_seconds"])
+    if wire_major == 1:
+        client = wirekit.Client(token="local-fixture-token", timeout=deployment["timeout_seconds"])
+    elif wire_major == 2:
+        client = wirekit.Client(credential="local-fixture-token", timeout_seconds=deployment["timeout_seconds"])
+    else:
+        raise ValueError("unsupported wirekit major")
     operation = request.get("operation", "sync")
     if operation == "sync":
         pages = request.get("pages", {"": {"items": [], "next_cursor": None}})
@@ -62,13 +71,12 @@ def run(request, root):
         max_attempts = request.get("max_attempts", deployment["max_attempts"])
         for attempt in range(1, max_attempts + 1):
             status = plan[min(attempt - 1, len(plan) - 1)]
-            if status < 500:
+            if not 500 <= status < 600:
                 return {"status": status, "attempts": attempt}
         raise ValueError("retry exhausted")
     if operation == "stream":
         with client.open(request["body"].encode("utf-8")) as response:
-            pass
-        body = response.body
+            body = response.body
         return json.loads(body.decode("utf-8"))
     if operation == "query":
         return {"query": urlencode(sorted(request["params"].items()), doseq=True)}
