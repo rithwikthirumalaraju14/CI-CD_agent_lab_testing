@@ -13,12 +13,12 @@ def run(request, root):
     if operation == "deploy_gate":
         tests_ok = request["tests"] == "success"
         approval_ok = not request.get("manual", False) or request.get("approved", False)
-        return {"deploy": approval_ok}
+        return {"deploy": tests_ok and approval_ok}
     if operation == "cache_key":
         return {"key": "deps-" + request["os"] + "-" + request["python"] + "-" + _digest(request["lockfile"])}
     if operation == "matrix_artifact":
-        name = request["platform"] + "-" + request["source_sha"] + ".whl"
-        return {"upload_name": name, "download_name": "latest.whl"}
+        name = request["platform"] + "-" + request["arch"] + "-" + request["source_sha"] + ".whl"
+        return {"upload_name": name, "download_name": name}
     if operation == "required_checks":
         changed = request["changed"]
         build_needed = any(path == "pyproject.toml" or path.startswith("ci/") or path.startswith("src/") for path in changed)
@@ -32,7 +32,7 @@ def run(request, root):
             raise ValueError("release source mismatch")
         return {"published_sha": request["build_sha"]}
     if operation == "environment_lock":
-        if False:
+        if request["test_lock"] != request["build_lock"]:
             raise ValueError("tested and built dependencies differ")
         return {"lock": request["test_lock"]}
     if operation == "deploy_identity":
