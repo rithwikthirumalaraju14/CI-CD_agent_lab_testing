@@ -1,0 +1,14 @@
+{
+  "europe": {
+    "csv": {
+      "decimal": ",",
+      "delimiter": ";",
+      "thousands": "."
+    }
+  },
+  "strict": {
+    "rules": {
+      "minimum": "10"
+    }
+  }
+}
