@@ -1,0 +1,7 @@
+{
+  "environment": "staging",
+  "required_checks": [
+    "tests",
+    "build"
+  ]
+}
