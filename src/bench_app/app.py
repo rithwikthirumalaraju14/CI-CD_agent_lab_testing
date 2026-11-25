@@ -19,7 +19,7 @@ def policy():
 
 def manifest_digest(entries):
     digest = hashlib.sha256()
-    for name in entries:
+    for name in sorted(entries):
         digest.update(name.encode("utf-8") + b"\0" + entries[name].encode("utf-8") + b"\0")
     return digest.hexdigest()
 
@@ -66,7 +66,7 @@ def inspect_tar(encoded):
             if not member.isfile():
                 raise ValueError("only regular archive files are supported")
             canonical = str(parts)
-            if name in seen:
+            if canonical in seen:
                 raise ValueError("duplicate archive member")
             seen.add(canonical)
             members.append(canonical)
