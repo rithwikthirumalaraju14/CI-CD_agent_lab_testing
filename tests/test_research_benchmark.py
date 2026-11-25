@@ -186,8 +186,6 @@ def test_healthy_seeds_pass_complete_offline_contract(tmp_path, case_id):
     before = {dist.metadata["Name"]: dist.version for dist in importlib.metadata.distributions()}
     result = materialize_baseline(case_id, tmp_path / "project", verifier_dir=tmp_path / "verifier")
     verification = verify_snapshot(result.destination, result.verifier_dir, work_dir=tmp_path)
-    if case_id == "rv2-001" and not verification.passed:
-        print("Offline public diagnostic:", verification.phases[-1].detail, flush=True)
     assert verification.passed, verification.to_dict()
     assert [phase.phase for phase in verification.phases] == list(result.contract.required_phases)
     counts = {phase.phase: phase.tests for phase in verification.phases}

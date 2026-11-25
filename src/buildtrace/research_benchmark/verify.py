@@ -208,7 +208,9 @@ def verify_snapshot(
     The working directory is temporary and never put inside either input tree.
     """
     project, verifier = Path(project).resolve(), Path(verifier_dir).resolve()
-    python = str(Path(python).resolve())
+    # Keep the venv launcher path: resolving it follows the symlink to the
+    # system interpreter and drops the venv's installed test dependencies.
+    python = str(Path(python).absolute())
     contract = contract or load_contract(verifier)
     result = VerificationResult()
     if any(type(count) is not int or count <= 0 for count in (contract.expected_public_tests, contract.expected_oracle_tests)):
