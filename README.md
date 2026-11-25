@@ -7,8 +7,8 @@ WikiTrace source reads, patches, and CI outcomes.
 
 The 50 learning inputs and the development/exam inputs live on separate Git
 branches in this repository. Generated captures, agent trajectories, the frozen
-memory corpus, operator reference fixes, and local credentials are not part of
-this source branch.
+memory corpus, and local credentials are not part of this source branch. The
+older research benchmark modules required by the dashboard are included.
 
 ## Run locally
 

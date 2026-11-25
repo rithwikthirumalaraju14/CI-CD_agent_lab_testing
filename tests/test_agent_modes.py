@@ -78,7 +78,7 @@ class FakeMemory:
     def assert_test_separation(self, spec):
         pass
 
-    def read(self, insight_id, layer, document, offset, limit):
+    def read(self, insight_id, layer, document, offset, limit, *, needle=""):
         self.reads += 1
         citation = EvidenceCitation(
             insight_id=insight_id, source_run_id="step-0000", layer=layer,
