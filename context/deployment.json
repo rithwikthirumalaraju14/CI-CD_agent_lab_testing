@@ -1,0 +1,6 @@
+{
+  "max_attempts": 3,
+  "network": "disabled; fixture transport only",
+  "timeout_seconds": 5,
+  "wire_major": 2
+}
