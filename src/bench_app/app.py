@@ -15,7 +15,8 @@ def run(request, root):
         approval_ok = not request.get("manual", False) or request.get("approved", False)
         return {"deploy": tests_ok and approval_ok}
     if operation == "cache_key":
-        return {"key": "deps-" + request["os"] + "-" + "any" + "-" + "fixed"}
+        digest = _digest(request["lockfile"])
+        return {"key": "deps-" + request["os"] + "-" + request["python"] + "-" + digest}
     if operation == "matrix_artifact":
         name = request["platform"] + "-" + request["arch"] + "-" + request["source_sha"] + ".whl"
         return {"upload_name": name, "download_name": name}
