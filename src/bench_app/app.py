@@ -14,7 +14,8 @@ import zipfile
 
 
 def policy():
-    return json.loads(open("src/bench_app/data/policy.json", encoding="utf-8").read())
+    resource = files(__package__).joinpath("data", "policy.json")
+    return json.loads(resource.read_text(encoding="utf-8"))
 
 
 def manifest_digest(entries):
@@ -94,7 +95,7 @@ def run(request, root):
     if operation == "groups":
         groups = {}
         for row in request["rows"]:
-            name = row["name"]
+            name = unicodedata.normalize("NFC", row["name"])
             groups[name] = groups.get(name, 0) + row["count"]
         return {"groups": groups}
     if operation == "weighted":
