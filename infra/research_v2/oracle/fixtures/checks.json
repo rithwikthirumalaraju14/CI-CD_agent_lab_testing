@@ -1,0 +1,257 @@
+[
+  {
+    "error": null,
+    "expected": {
+      "count": 1,
+      "records": [
+        {
+          "amount": "1234.50",
+          "description": "",
+          "id": "a",
+          "revision": 1,
+          "timestamp": "2025-01-01T00:00:00Z"
+        }
+      ],
+      "total": "1234.50"
+    },
+    "name": "option_partial_profile",
+    "request": {
+      "csv": "id|amount\na|1.234,50\n",
+      "options": {
+        "csv": {
+          "delimiter": "|"
+        }
+      },
+      "profile": "europe"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "count": 1,
+      "records": [
+        {
+          "amount": "1.00",
+          "description": "keep﻿here",
+          "id": "a",
+          "revision": 1,
+          "timestamp": "2025-01-01T00:00:00Z"
+        }
+      ],
+      "total": "1.00"
+    },
+    "name": "signature_only_at_start",
+    "request": {
+      "csv": "﻿id,amount,description\na,1,keep﻿here\n"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "count": 2,
+      "records": [
+        {
+          "amount": "-1.00",
+          "description": "",
+          "id": "a",
+          "revision": 1,
+          "timestamp": "2025-01-01T00:00:00Z"
+        },
+        {
+          "amount": "1.02",
+          "description": "",
+          "id": "b",
+          "revision": 1,
+          "timestamp": "2025-01-01T00:00:00Z"
+        }
+      ],
+      "total": "0.02"
+    },
+    "name": "ties_are_symmetric",
+    "request": {
+      "csv": "id,amount\na,-1.005\nb,1.015\n",
+      "minimum": -2
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "count": 1,
+      "records": [
+        {
+          "amount": "1.00",
+          "description": "",
+          "id": "a",
+          "revision": 1,
+          "timestamp": "2025-05-01T02:15:00Z"
+        }
+      ],
+      "total": "1.00"
+    },
+    "name": "negative_offset",
+    "request": {
+      "csv": "id,amount,timestamp\na,1,2025-04-30T23:15:00-03:00\n"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "count": 1,
+      "records": [
+        {
+          "amount": "0.00",
+          "description": "",
+          "id": "a",
+          "revision": 1,
+          "timestamp": "2025-01-01T00:00:00Z"
+        }
+      ],
+      "total": "0.00"
+    },
+    "name": "zero_not_configured_floor",
+    "request": {
+      "csv": "id,amount\na,0\n",
+      "minimum": 0,
+      "profile": "strict"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "count": 1,
+      "records": [
+        {
+          "amount": "1.00",
+          "description": "a, \"b\"\nc",
+          "id": "a",
+          "revision": 1,
+          "timestamp": "2025-01-01T00:00:00Z"
+        }
+      ],
+      "total": "1.00"
+    },
+    "name": "csv_escaped_quotes",
+    "request": {
+      "csv": "id,amount,description\na,1,\"a, \"\"b\"\"\nc\"\n"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "count": 1,
+      "records": [
+        {
+          "amount": "-9007199254740993.01",
+          "description": "",
+          "id": "a",
+          "revision": 1,
+          "timestamp": "2025-01-01T00:00:00Z"
+        }
+      ],
+      "total": "-9007199254740993.01"
+    },
+    "name": "large_json_negative",
+    "request": {
+      "format": "jsonl",
+      "jsonl": "\n{\"id\":\"a\",\"amount\":-9007199254740993.01}\n",
+      "minimum": "-9999999999999999"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "count": 1,
+      "records": [
+        {
+          "amount": "10.00",
+          "description": "",
+          "id": "a",
+          "revision": 10,
+          "timestamp": "2025-01-01T00:00:00Z"
+        }
+      ],
+      "total": "10.00"
+    },
+    "name": "dedup_revision_not_lexical",
+    "request": {
+      "csv": "id,amount,revision\na,10,10\na,9,9\n"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "count": 1,
+      "records": [
+        {
+          "amount": "3.00",
+          "description": "",
+          "id": "a",
+          "revision": 2,
+          "timestamp": "2025-01-01T00:00:00Z"
+        }
+      ],
+      "total": "3.00"
+    },
+    "name": "equal_revision_stability",
+    "request": {
+      "csv": "id,amount,revision\na,3,2\na,8,2\n"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "count": 0,
+      "records": [],
+      "total": "0.00"
+    },
+    "name": "watermark_same_instant",
+    "request": {
+      "after": "2025-01-01T00:00:00Z",
+      "csv": "id,amount,timestamp\na,1,2025-01-01T01:00:00+01:00\n"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "count": 1,
+      "records": [
+        {
+          "amount": "1.00",
+          "description": "",
+          "id": "a",
+          "revision": 1,
+          "timestamp": "2025-01-01T00:00:01Z"
+        }
+      ],
+      "total": "1.00"
+    },
+    "name": "watermark_after_instant",
+    "request": {
+      "after": "2025-01-01T00:00:00Z",
+      "csv": "id,amount,timestamp\na,1,2025-01-01T00:00:01Z\n"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "count": 1,
+      "records": [
+        {
+          "amount": "2.34",
+          "description": "",
+          "id": "x",
+          "revision": 1,
+          "timestamp": "2025-01-01T00:00:00Z"
+        }
+      ],
+      "total": "2.34"
+    },
+    "name": "partner_rounding",
+    "request": {
+      "csv": "external_id,net\nx,2.345\n",
+      "options": {
+        "schema_file": "context/schemas/partner.json"
+      }
+    }
+  }
+]
