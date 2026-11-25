@@ -21,7 +21,10 @@ def run(request, root):
         return {"upload_name": name, "download_name": name}
     if operation == "required_checks":
         changed = request["changed"]
-        build_needed = any(path.startswith("ci/") or path.startswith("src/") for path in changed)
+        build_needed = any(
+            path.startswith(("ci/", "src/")) or path == "pyproject.toml"
+            for path in changed
+        )
         checks = ["tests", "build"] if build_needed else ["tests"]
         return {"checks": checks, "release": all(request["status"].get(check) in {"success", "skipped"} for check in checks)}
     if operation == "readiness":
