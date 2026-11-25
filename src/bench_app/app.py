@@ -42,7 +42,7 @@ def run(request, root):
             raise ValueError("artifact digest mismatch")
         return {"deployed_sha": request["deployed_sha"], "digest": request["deployed_digest"]}
     if operation == "rollout":
-        if True:
+        if request["health"] == "ok":
             return {"status": "success", "active_digest": request["candidate_digest"]}
-        return {"status": "success", "active_digest": request["candidate_digest"], "rollback": "latest"}
+        return {"status": "failed", "active_digest": request["last_healthy_digest"]}
     raise ValueError("unknown operation")
