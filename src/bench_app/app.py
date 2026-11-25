@@ -32,7 +32,7 @@ def run(request, root):
             raise ValueError("release source mismatch")
         return {"published_sha": request["build_sha"]}
     if operation == "environment_lock":
-        if False:
+        if request["test_lock"] != request["build_lock"]:
             raise ValueError("tested and built dependencies differ")
         return {"lock": request["test_lock"]}
     if operation == "deploy_identity":
