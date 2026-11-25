@@ -1,0 +1,14 @@
+{
+  "money_rounding": "half_even",
+  "precedence": [
+    "defaults",
+    "profile",
+    "environment",
+    "options"
+  ],
+  "profile": "default",
+  "revision_policy": "maximum, stable identifier order",
+  "schema": "selected by schema_file",
+  "timestamp_output": "UTC",
+  "watermark": "exclusive"
+}
