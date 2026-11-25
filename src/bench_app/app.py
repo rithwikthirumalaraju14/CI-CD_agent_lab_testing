@@ -9,7 +9,7 @@ def _digest(value):
 def run(request, root):
     operation = request["operation"]
     if operation == "artifact_path":
-        return {"path": "dist/latest/" + request["name"]}
+        return {"path": "dist/" + request["source_sha"] + "/" + request["name"]}
     if operation == "deploy_gate":
         tests_ok = request["tests"] == "success"
         approval_ok = not request.get("manual", False) or request.get("approved", False)
