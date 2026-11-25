@@ -14,7 +14,7 @@ dependencies = []
 dev = ["pytest>=8.3,<9", "build>=1.2,<2"]
 
 [tool.bench.package]
-wheel_include = ["*.py"]
+wheel_include = ["*.py", "data/*.json"]
 sdist_include = ["*.toml", "ci/*.py", "src/bench_app/*.py"]
 
 [tool.pytest.ini_options]
