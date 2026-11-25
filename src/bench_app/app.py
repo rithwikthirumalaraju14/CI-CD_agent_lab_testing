@@ -19,7 +19,7 @@ def policy():
 
 def manifest_digest(entries):
     digest = hashlib.sha256()
-    for name in entries:
+    for name in sorted(entries):
         digest.update(name.encode("utf-8") + b"\0" + entries[name].encode("utf-8") + b"\0")
     return digest.hexdigest()
 
@@ -104,7 +104,7 @@ def run(request, root):
         total = sum(Decimal(str(row["mean_ms"])) * row["count"] for row in request["rows"])
         return {"mean_ms": str((total / count).quantize(Decimal("0.001")))}
     if operation == "releases":
-        return {"versions": sorted(request["versions"], key=str)}
+        return {"versions": sorted(request["versions"], key=version_key)}
     if operation == "digest":
         data = base64.b64decode(request["base64"], validate=True)
         return {"sha256": hashlib.sha256(data).hexdigest()}
