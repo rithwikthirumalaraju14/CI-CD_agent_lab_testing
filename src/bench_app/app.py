@@ -4,7 +4,7 @@ import hashlib
 import json
 from urllib.parse import urlencode
 import wirekit
-from wirekit import sign_payload
+from .signatures import sign_payload
 
 
 def decode_response(response):
@@ -13,7 +13,7 @@ def decode_response(response):
     for parameter in content_type.split(";")[1:]:
         key, _, value = parameter.strip().partition("=")
         if key.lower() == "charset":
-            charset = value.strip('"')
+            charset = value.strip('\"')
     return json.loads(response.body.decode(charset))
 
 
@@ -52,7 +52,7 @@ def run(request, root):
     if operation == "sign":
         return {"signature": sign_payload(request["payload"])}
     if operation == "key":
-        payload = json.dumps(request["payload"], sort_keys=False, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+        payload = json.dumps(request["payload"], sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
         return {"key": hashlib.sha256(payload).hexdigest()}
     if operation == "retry_delay":
         now = datetime.fromisoformat(request["now"].replace("Z", "+00:00")).astimezone(timezone.utc)
