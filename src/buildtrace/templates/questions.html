@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Question lab · BuildTrace{% endblock %}
+{% block milestone %}03 / Question lab{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='questions.css') }}">{% endblock %}
+{% block content %}
+<div class="ql-shell">
+  <div class="ql-head"><p class="ql-kicker">LIVE CI REPAIR EXPERIMENT</p><h1>Choose a CI/CD problem</h1>
+    <p>One click starts three independent attempts for each agent: No memory, Insights only, and WikiTrace. Each attempt uses a fresh conversation and the same fixed failing snapshot.</p></div>
+  {% if error %}<div class="ql-alert" role="alert">{{ error }}</div>{% endif %}
+  {% if not lab.enabled %}<div class="ql-alert">Live runs are off. Start the local server with <code>python -m buildtrace serve --enable-question-runs</code> to enable the launch buttons. Existing runs remain readable below.</div>{% endif %}
+  <div class="ql-grid">
+    {% for question in questions %}
+    <article class="ql-question">
+      <div class="ql-question-top"><span>{{ question.id | upper }}</span><span>{{ question.case_id }}</span></div>
+      <h2>{{ question.title }}</h2><p>{{ question.prompt }}</p>
+      <div class="ql-focus"><strong>What to watch</strong><p>{{ question.focus }}</p></div>
+      <details class="ql-answer"><summary>Operator baseline answer</summary><p>{{ question.baseline }}</p></details>
+      <form method="post" action="{{ url_for('start_question', question_id=question.id) }}">
+        <input type="hidden" name="token" value="{{ launch_token }}">
+        <button type="submit" {% if not lab.enabled %}disabled{% endif %}>Start 3 agents × 3 attempts <span aria-hidden="true">→</span></button>
+      </form>
+    </article>
+    {% endfor %}
+  </div>
+  <section class="ql-recent"><div class="ql-section-head"><h2>Recent question runs</h2><p>Saved trial records remain available after the run finishes.</p></div>
+    {% if recent %}<div class="ql-run-list">{% for job in recent[:12] %}<a href="{{ url_for('question_run', job_id=job.id) }}"><strong>{{ job.question_id | upper }} · {{ job.case_id }}</strong><span>{{ job.id }}</span><span class="ql-status ql-status-{{ job.status }}">{{ job.status }}</span></a>{% endfor %}</div>
+    {% else %}<p class="ql-muted">No question runs yet.</p>{% endif %}
+  </section>
+  <p class="ql-note">The UI shows observable plans, tool calls, patches, and verification results. The model's private reasoning is not exposed. Starting a run creates GitHub branches and CI jobs and uses paid model calls.</p>
+</div>
+{% endblock %}

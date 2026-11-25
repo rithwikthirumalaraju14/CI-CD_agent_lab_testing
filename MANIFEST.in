@@ -1,0 +1,11 @@
+include BUILDTRACE_PLAN.md
+include THIRD_PARTY.md
+include PILOT_RESULTS.md
+include RESEARCH_V2_RESULTS.md
+include .env.example
+include ci/constraints.txt
+recursive-include docs *.md
+recursive-include experiments *.json
+recursive-include tests *.py
+recursive-include benchmarks/research_v2 *.json *.md
+recursive-include infra/research_v2 *.py *.yml *.json *.ini *.md

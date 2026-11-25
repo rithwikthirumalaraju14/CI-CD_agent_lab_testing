@@ -1,0 +1,45 @@
+{
+  "id": "invoice-training-v1",
+  "data_kind": "live",
+  "model": {"provider": "openai", "model": "gpt-6-luna", "temperature": null, "reasoning_effort": "medium"},
+  "budget": {"model_calls": 20, "patch_attempts": 3, "max_output_tokens": 8192, "total_tokens": 80000, "wall_seconds": 1200},
+  "trials": 3,
+  "hold_out_families": true,
+  "seed": 42,
+  "tasks": [
+    {
+      "id": "case-002", "family": "tax-base", "split": "train", "category": "test",
+      "repository": "bluepal-rithwik-thirumalaraju/buildtrace-ci-lab",
+      "base_sha": "138460b97f80b59252fce8397869c327e9b7b35c",
+      "initial_run_url": "https://github.com/bluepal-rithwik-thirumalaraju/buildtrace-ci-lab/actions/runs/43819902392/attempts/1",
+      "capture_id": "6f49368ee7ea494e830f4f7de612fab3",
+      "oracle_sha": "ab6ed493adf94149b45fd742e873cad8d2985447"
+    },
+    {
+      "id": "case-003", "family": "dependency-ci-pin", "split": "train", "category": "dependency",
+      "repository": "bluepal-rithwik-thirumalaraju/buildtrace-ci-lab",
+      "base_sha": "d8f142e65ec5a951885e12439c75dc80267ba58b",
+      "initial_run_url": "https://github.com/bluepal-rithwik-thirumalaraju/buildtrace-ci-lab/actions/runs/43820019210/attempts/1",
+      "capture_id": "9168ae70d71f438e81c196a9e09ebda0",
+      "oracle_sha": "ab6ed493adf94149b45fd742e873cad8d2985447"
+    },
+    {
+      "id": "case-004", "family": "import-version", "split": "train", "category": "import",
+      "repository": "bluepal-rithwik-thirumalaraju/buildtrace-ci-lab",
+      "base_sha": "b12f41bfc159cbb6d6af098e535aa7b456e766e6",
+      "initial_run_url": "https://github.com/bluepal-rithwik-thirumalaraju/buildtrace-ci-lab/actions/runs/43820094774/attempts/1",
+      "capture_id": "83f95f8e8b4d4627ae6fda35b9b73df3",
+      "oracle_sha": "ab6ed493adf94149b45fd742e873cad8d2985447"
+    },
+    {
+      "id": "case-005", "family": "environment-missing", "split": "train", "category": "configuration",
+      "repository": "bluepal-rithwik-thirumalaraju/buildtrace-ci-lab",
+      "base_sha": "f70e9e4c27a45cc81b901659f1e2604612f14bc6",
+      "initial_run_url": "https://github.com/bluepal-rithwik-thirumalaraju/buildtrace-ci-lab/actions/runs/43820160917/attempts/1",
+      "capture_id": "64ca9d3a6c72457e80ae76b67993b72e",
+      "oracle_sha": "ab6ed493adf94149b45fd742e873cad8d2985447",
+      "editable_paths": ["src/**/*.py", "pyproject.toml", "ci/constraints.txt", ".github/workflows/ci.yml"],
+      "protected_paths": ["tests/", "ci/record_environment.py"]
+    }
+  ]
+}

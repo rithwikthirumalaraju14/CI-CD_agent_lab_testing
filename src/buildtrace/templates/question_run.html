@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ question.title }} · BuildTrace{% endblock %}
+{% block milestone %}04 / Live comparison{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='questions.css') }}"><script src="{{ url_for('static', filename='questions.js') }}" defer></script>{% endblock %}
+{% block content %}
+<div class="ql-shell" data-question-run="{{ job.id }}">
+  <a class="ql-back" href="{{ url_for('questions_page') }}">← All questions</a>
+  <div class="ql-head"><p class="ql-kicker">{{ question.id | upper }} · {{ question.case_id }}</p><h1>{{ question.title }}</h1><p>{{ question.prompt }}</p></div>
+  <div class="ql-summary"><div><span>Run</span><strong>{{ job.id }}</strong></div><div><span>Status</span><strong id="ql-job-status">{{ job.status }}</strong></div><div><span>Recorded</span><strong id="ql-completed">{{ completed }} / 9 attempts</strong></div></div>
+  {% if job.error %}<div class="ql-alert" role="alert">{{ job.error }}</div>{% endif %}
+  <p class="ql-note">The three modes use the same problem, model, limits and verifier. Insights only and WikiTrace receive the same frozen insight packet. WikiTrace alone can open linked historical evidence. Refreshing this page does not launch another run.</p>
+  {% if packet %}<details class="ql-packet" id="insight-packet"><summary>Exact insight packet sent to both memory agents · {{ packet.insight_ids | length }} insights</summary><div class="ql-packet-meta">SHA-256 {{ packet.sha256 }}</div><pre>{{ packet.text }}</pre></details>{% endif %}
+  <div class="ql-agent-grid">
+  {% for mode, label in [('no-memory', 'No memory'), ('insights-only', 'Insights only'), ('wikitrace', 'WikiTrace')] %}
+    <section class="ql-agent ql-agent-{{ mode }}"><div class="ql-agent-head"><h2>{{ label }}</h2><span>{{ 'Current evidence' if mode == 'no-memory' else 'Insight packet' if mode == 'insights-only' else 'Insight packet + source reads' }}</span></div>
+      {% for trial in trials if trial.mode == mode %}
+      <div class="ql-attempt" data-mode="{{ mode }}" data-attempt="{{ trial.attempt }}">
+        <div><strong>Attempt {{ trial.attempt }}</strong><span class="ql-status ql-status-{{ trial.status }}" data-field="status">{{ trial.status }}</span></div>
+        <p class="ql-packet-delivery" data-field="packet_delivery">{% if mode == 'no-memory' %}No insight packet{% elif trial.packet_delivered %}{{ trial.packet_count }} insights delivered in prompt{% else %}Insight packet pending{% endif %}</p>
+        <p><span data-field="actions">{{ trial.actions }}</span> actions · <span data-field="historical_reads">{{ trial.historical_reads }}</span> history requests · <span data-field="raw_reads">{{ trial.raw_reads }}</span> raw reads</p>
+        {% if mode != 'no-memory' and packet %}<a class="ql-packet-link" href="#insight-packet">See exact insight text</a>{% endif %}
+        {% if trial.id %}<a href="{{ url_for('question_trial', job_id=job.id, trial_id=trial.id) }}">Open plan and evidence trace →</a>{% else %}<span class="ql-muted">Preparing fixed input and agent sessions…</span>{% endif %}
+      </div>
+      {% endfor %}
+    </section>
+  {% endfor %}
+  </div>
+  <p class="ql-note">A history request or raw excerpt does not by itself prove that evidence affected a fix. Open a trace to compare its before/after plans, subsequent patch, and CI/oracle result. A reviewer must confirm material effects.</p>
+</div>
+{% endblock %}

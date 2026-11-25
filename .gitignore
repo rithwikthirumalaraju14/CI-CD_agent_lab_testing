@@ -1,7 +1,11 @@
+.env
+.venv/
 __pycache__/
 .pytest_cache/
-.venv/
+data/
 output/
-lab_operator/
+tmp/
 dist/
+artifacts/
+lab_operator/
 *.egg-info/

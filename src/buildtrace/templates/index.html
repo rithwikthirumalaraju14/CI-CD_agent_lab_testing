@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Investigate a build · BuildTrace{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">FROM FAILED BUILD TO TRACEABLE EVIDENCE</p>
+  <h1>A build failed.<br><span>Start with the evidence.</span></h1>
+  <p class="intro">Bring a GitHub Actions run. Preserve its original logs, find the failing steps, and inspect the project configuration at its reported revision.</p>
+</section>
+
+<section class="input-panel" aria-labelledby="capture-heading">
+  <div class="panel-heading"><span class="step-number">01</span><h2 id="capture-heading">Inspect a workflow run</h2><span class="tag">GitHub Actions</span></div>
+  <form method="post" id="capture-form">
+    <label for="run-url">GitHub Actions run URL</label>
+    <div class="input-row">
+      <input id="run-url" name="run_url" type="url" required maxlength="2048" value="{{ run_url }}" placeholder="https://github.com/owner/repo/actions/runs/123456" autocomplete="off">
+      <button type="submit" id="capture-button">Inspect &amp; archive <span aria-hidden="true">↗</span></button>
+    </div>
+    <p class="helper">A capture is pinned to one run attempt. Existing archives remain intact.</p>
+    <p class="loading-message" id="loading-message" role="status" hidden>Collecting the run, logs, and configuration from GitHub. This can take a few seconds…</p>
+    {% if error %}<div class="error-message" role="alert">{{ error }}</div>{% endif %}
+  </form>
+</section>
+
+<section class="feature-row" aria-label="What gets captured">
+  <article><span class="feature-icon">01</span><h3>Execution</h3><p>The selected attempt, its jobs, and the steps that actually failed.</p></article>
+  <article><span class="feature-icon">02</span><h3>Original evidence</h3><p>Downloadable logs and API responses with SHA-256 file checksums.</p></article>
+  <article><span class="feature-icon">03</span><h3>Project context</h3><p>Workflow and dependency declarations at the reported head revision.</p></article>
+</section>
+
+<section class="recent-section">
+  <div class="section-heading"><div><p class="eyebrow">YOUR LOCAL EVIDENCE LIBRARY</p><h2>Recent captures</h2></div><span class="muted">{{ recent|length }} shown</span></div>
+  {% if recent %}
+    <div class="capture-list">
+      {% for capture in recent %}
+      <a class="capture-card" href="{{ url_for('capture_detail', capture_id=capture.id) }}">
+        <span class="status status-{{ capture.run.conclusion or 'pending' }}">{{ capture.run.conclusion or capture.run.status or 'unknown' }}</span>
+        <div class="capture-card-body"><strong>{{ capture.run.name or 'Workflow run' }}</strong><span>{{ capture.reference.owner }}/{{ capture.reference.repository }}</span></div>
+        <div class="capture-card-meta"><code>{{ capture.source_ref[:8] }}</code><span>Attempt {{ capture.reference.attempt }}</span></div>
+        <span class="card-arrow" aria-hidden="true">↗</span>
+      </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state"><span class="empty-icon">⌁</span><h3>Your first investigation starts above.</h3><p>Paste a workflow run URL to create a real, locally saved evidence capture.</p></div>
+  {% endif %}
+</section>
+{% endblock %}

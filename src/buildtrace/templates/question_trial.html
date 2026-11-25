@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Attempt {{ trial.attempt }} · {{ trial.mode }} · BuildTrace{% endblock %}
+{% block milestone %}05 / Agent trace{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='questions.css') }}">{% endblock %}
+{% block content %}
+<div class="ql-shell">
+  <a class="ql-back" href="{{ url_for('question_run', job_id=state.job.id) }}">← Back to three agents</a>
+  <div class="ql-head"><p class="ql-kicker">{{ state.question.id | upper }} · {{ trial.mode }}</p><h1>Attempt {{ trial.attempt }} trace</h1><p>Observable decisions and tool results in execution order. Private reasoning text is unavailable.</p></div>
+  <div class="ql-summary"><div><span>Outcome</span><strong>{{ trial.status }}</strong></div><div><span>Tool calls</span><strong>{{ trial.actions }}</strong></div><div><span>Historical / raw</span><strong>{{ trial.historical_reads }} / {{ trial.raw_reads }}</strong></div></div>
+  <p class="ql-note">{% if trial.mode == 'no-memory' %}No historical insight packet was sent in this attempt.{% elif trial.packet_delivered %}{{ trial.packet_count }} insights were delivered inside the initial user prompt. Expand the packet below to read them; the initial user message in the timeline shows the actual prompt.{% else %}The packet's prompt delivery is not yet confirmed from this trace.{% endif %} History requests count only calls that open linked source evidence.</p>
+  {% if result %}<div class="ql-verdict"><strong>{{ result.outcome }}</strong><span>{{ result.stop_reason }}</span>
+    {% for verification in result.verifications %}<p>Patch {{ loop.index }}: {{ 'passed' if verification.passed else 'failed' }}{% if verification.run_url %} · <a href="{{ verification.run_url }}" target="_blank" rel="noopener">candidate CI</a>{% endif %}{% if verification.oracle_run_url %} · <a href="{{ verification.oracle_run_url }}" target="_blank" rel="noopener">trusted oracle</a>{% endif %}</p>{% endfor %}</div>{% endif %}
+  {% if trial.mode != 'no-memory' and state.packet %}<details class="ql-packet"><summary>Exact injected insight packet · {{ state.packet.insight_ids | join(', ') }}</summary><div class="ql-packet-meta">SHA-256 {{ state.packet.sha256 }}</div><pre>{{ state.packet.text }}</pre></details>{% endif %}
+  {% if result and result.evidence_decisions %}<section class="ql-review"><h2>Before / after source decisions</h2>
+    {% for decision in result.evidence_decisions %}<article><strong>{{ decision.question }}</strong><p>Trigger: {{ decision.trigger }} · Review: {{ decision.material_effect }} · Adoption: {{ decision.adoption }}</p><div class="ql-decision-pair"><div><span>Before</span><pre>{{ decision.before | tojson(indent=2) }}</pre></div><div><span>After</span><pre>{{ decision.after | tojson(indent=2) }}</pre></div></div></article>{% endfor %}
+  </section>{% endif %}
+  <section class="ql-timeline"><h2>Event timeline</h2>
+    {% for row in rows %}
+    <article class="ql-event {% if row.type == 'function_call' and row.name == 'read_historical_evidence' %}ql-proof{% endif %}">
+      <div class="ql-event-head"><span class="ql-event-number">{{ loop.index }}</span>
+        <strong>{% if row.type == 'function_call' %}{{ row.name }}{% elif row.type == 'observable_action' %}{{ row.kind }}{% elif row.type == 'message' %}{{ row.role }} message{% else %}{{ row.type }}{% endif %}</strong>
+        {% if row.type == 'function_call' and row.name == 'read_historical_evidence' %}<span class="ql-status {{ 'ql-status-infra-error' if row.is_error else 'ql-status-solved' }}">{{ 'read error' if row.is_error else row.arguments.layer ~ ' source delivered' }}</span>{% endif %}
+      </div>
+      {% if row.type == 'observable_action' and row.decision %}<p class="ql-action">{{ row.decision.action }} · {{ row.decision.target }} — {{ row.decision.summary }}</p>{% endif %}
+      {% if row.type == 'function_call' and row.name == 'read_historical_evidence' %}
+        <p class="ql-action">{{ row.arguments.question }} · trigger: {{ row.arguments.trigger }} · insight: {{ row.arguments.insight_id }}</p>
+        {% if row.result and row.result.citation %}<p class="ql-citation">{{ row.result.citation.document }} · source {{ row.result.citation.source_run_id }} · lines {{ row.result.citation.first_line }}–{{ row.result.citation.last_line }} · document SHA-256 {{ row.result.citation.document_sha256 }}{% if row.result.excerpt_sha256 %} · excerpt SHA-256 {{ row.result.excerpt_sha256 }}{% endif %}</p>{% endif %}
+        {% if row.result and row.result.text %}<details open><summary>Open delivered {{ row.arguments.layer }} excerpt</summary><pre>{{ row.result.text }}</pre></details>{% else %}<pre>{{ row.result | tojson(indent=2) }}</pre>{% endif %}
+      {% elif row.type == 'function_call' %}<details><summary>Arguments and result</summary><pre>{{ row.arguments | tojson(indent=2) }}</pre><pre>{{ row.result | tojson(indent=2) }}</pre></details>
+      {% elif row.type == 'message' %}<details><summary>Recorded message{% if row.usage %} · {{ row.usage.input_tokens }} input / {{ row.usage.output_tokens }} output tokens{% endif %}</summary><pre>{{ row.content if row.content is string else row | tojson(indent=2) }}</pre></details>
+      {% elif row.type != 'observable_action' %}<details><summary>Recorded event</summary><pre>{{ row | tojson(indent=2) }}</pre></details>{% endif %}
+    </article>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

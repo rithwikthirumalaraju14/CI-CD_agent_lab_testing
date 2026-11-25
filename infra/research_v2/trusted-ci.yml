@@ -1,0 +1,105 @@
+name: Benchmark CI
+run-name: ${{ inputs.dispatch_id && format('BuildTrace {0} {1} {2}', inputs.oracle_mode && 'oracle' || 'target', inputs.source_sha || github.sha, inputs.dispatch_id) || format('Benchmark CI {0}', github.sha) }}
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Full candidate SHA for independently trusted verification
+        required: false
+        default: ""
+        type: string
+      oracle_mode:
+        description: Use the protected original suite and fixed discovery settings
+        required: false
+        default: false
+        type: boolean
+      dispatch_id:
+        description: Unique operator dispatch correlation ID
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  bench-checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      CANDIDATE_DIR: ${{ github.workspace }}/_candidate
+      TRUSTED_DIR: ${{ github.workspace }}/_trusted
+      EVIDENCE_DIR: ${{ github.workspace }}/_evidence
+      REQUESTED_SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
+      WORKFLOW_SHA: ${{ github.sha }}
+      ORACLE_MODE: ${{ inputs.oracle_mode && 'true' || 'false' }}
+      RUN_ID: ${{ github.run_id }}
+      RUN_ATTEMPT: ${{ github.run_attempt }}
+    defaults:
+      run:
+        working-directory: _candidate
+    steps:
+      - name: Check out trusted verifier and original tests
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: _trusted
+          persist-credentials: false
+      - name: Check out tested revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha || github.sha }}
+          path: _candidate
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Create clean environment
+        run: |
+          python -m venv .venv
+          echo "$CANDIDATE_DIR/.venv/bin" >> "$GITHUB_PATH"
+      - name: Record initial environment
+        id: environment
+        run: >-
+          python "$TRUSTED_DIR/infra/research_v2/verify.py" record
+          --candidate "$CANDIDATE_DIR" --trusted "$TRUSTED_DIR"
+          --contract "$TRUSTED_DIR/infra/research_v2/contract.json" --artifacts "$EVIDENCE_DIR"
+          --oracle-mode "$ORACLE_MODE" --source-sha "$REQUESTED_SOURCE_SHA" --workflow-sha "$WORKFLOW_SHA"
+          --run-id "$RUN_ID" --run-attempt "$RUN_ATTEMPT"
+      - name: Install project and test dependencies
+        run: python -m pip install --editable ".[dev]" --constraint ci/constraints.txt
+      - name: Check dependency consistency
+        run: python -m pip check
+      - name: Run tests
+        run: >-
+          python "$TRUSTED_DIR/infra/research_v2/verify.py" test
+          --candidate "$CANDIDATE_DIR" --trusted "$TRUSTED_DIR"
+          --contract "$TRUSTED_DIR/infra/research_v2/contract.json" --artifacts "$EVIDENCE_DIR"
+      - name: Build package
+        run: python -m build
+      - name: Run example
+        run: |
+          if [ "$ORACLE_MODE" = "true" ]; then
+            python -I -m bench_app "$TRUSTED_DIR/examples/input.json"
+          else
+            python -m bench_app examples/input.json
+          fi
+      - name: Verify protected evidence
+        if: always() && steps.environment.outcome == 'success'
+        run: >-
+          python "$TRUSTED_DIR/infra/research_v2/verify.py" finalize
+          --candidate "$CANDIDATE_DIR" --trusted "$TRUSTED_DIR"
+          --contract "$TRUSTED_DIR/infra/research_v2/contract.json" --artifacts "$EVIDENCE_DIR"
+      - name: Upload execution evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-ci-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            _evidence/
+            _candidate/dist/
+          if-no-files-found: warn
+          retention-days: 30

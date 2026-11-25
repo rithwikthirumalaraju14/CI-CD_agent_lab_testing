@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}{{ capture.run.name or 'Workflow' }} · BuildTrace{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('index') }}">← All captures</a>
+<section class="capture-header">
+  <p class="eyebrow">ARCHIVED EXECUTION / {{ capture.reference.owner }}/{{ capture.reference.repository }}</p>
+  <div class="title-row"><h1>{{ capture.run.name or 'Workflow run' }}</h1><span class="status status-{{ capture.run.conclusion or 'pending' }}">{{ capture.run.conclusion or capture.run.status or 'unknown' }}</span></div>
+  <p class="muted">{{ capture.run.display_title or 'Workflow evidence' }}</p>
+  <div class="run-facts">
+    <div><span>RUN</span><strong>#{{ capture.reference.run_id }}</strong></div>
+    <div><span>ATTEMPT</span><strong>{{ capture.reference.attempt }}</strong></div>
+    <div><span>REPORTED HEAD SHA</span><code title="{{ capture.source_ref }}">{{ capture.source_ref[:12] }}</code></div>
+    <div><span>EVENT</span><strong>{{ capture.run.event or 'unknown' }}</strong></div>
+  </div>
+  <div class="action-row">
+    <a class="button-secondary" href="{{ capture.run_url }}" target="_blank" rel="noopener noreferrer">Open on GitHub ↗</a>
+    <a class="text-link" href="{{ url_for('capture_manifest', capture_id=capture.id) }}">View archive manifest</a>
+    {% if archive %}<a class="text-link" href="{{ url_for('evidence_file', capture_id=capture.id, entry_id=archive.id) }}">Download original log ZIP</a>{% endif %}
+  </div>
+</section>
+
+{% for warning in capture.warnings %}<div class="warning-message" role="status">{{ warning }}</div>{% endfor %}
+
+<nav class="section-nav" aria-label="Evidence sections"><a href="#failures">Failing steps</a><a href="#logs">Execution logs</a><a href="#sources">Project files</a><a href="#provenance">Provenance</a></nav>
+
+<section id="failures" class="evidence-section">
+  <div class="section-heading"><h2>Observed failing steps</h2><span class="muted">{{ failed_jobs|length }} failing job(s)</span></div>
+  {% for job in failed_jobs %}
+  <article class="failure-card">
+    <div class="failure-heading"><span class="failure-dot"></span><h3>{{ job.name }}</h3><span class="muted">{{ job.conclusion }}</span></div>
+    <ul class="steps-list">
+    {% for step in job.steps or [] %}
+      {% if step.conclusion in ['failure', 'timed_out', 'startup_failure', 'action_required'] %}
+      <li><span class="step-number">{{ step.number }}</span><strong>{{ step.name }}</strong><span class="status status-failure">{{ step.conclusion }}</span></li>
+      {% endif %}
+    {% endfor %}
+    </ul>
+  </article>
+  {% else %}<div class="notice-panel">The selected attempt reports no failing jobs. Its status is <strong>{{ capture.run.conclusion or capture.run.status }}</strong>.</div>{% endfor %}
+</section>
+
+<section id="logs" class="evidence-section">
+  <div class="section-heading"><div><p class="eyebrow">WHAT ACTUALLY HAPPENED</p><h2>Execution logs</h2></div><span class="muted">{{ logs|length }} files</span></div>
+  {% for log in logs %}
+  <details class="evidence-document" {% if log.failure_match or (loop.first and not failed_jobs) %}open{% endif %}>
+    <summary><span class="document-name">{{ log.label }}</span>{% if log.failure_match %}<span class="tag tag-red">Failing step</span>{% endif %}<span class="muted">{{ log.line_count }} lines</span></summary>
+    <div class="document-toolbar"><a href="{{ url_for('evidence_file', capture_id=capture.id, entry_id=log.id) }}" target="_blank" rel="noopener noreferrer">Open complete log ↗</a><code title="{{ log.sha256 }}">SHA-256 {{ log.sha256[:12] }}…</code></div>
+    <pre><code>{{ log.preview }}</code></pre>
+    {% if log.truncated %}<p class="preview-note">Preview shows the first 140 lines. Open the complete log for all {{ log.line_count }} lines.</p>{% endif %}
+  </details>
+  {% else %}<div class="notice-panel">No log previews were available. See the capture notes above and the original GitHub run.</div>{% endfor %}
+</section>
+
+<section id="sources" class="evidence-section">
+  <div class="section-heading"><div><p class="eyebrow">FILES AT THE REPORTED HEAD SHA</p><h2>Project context</h2></div><code>{{ capture.source_ref[:12] }}</code></div>
+  {% for source in sources %}
+  <details class="evidence-document">
+    <summary><span class="document-name">{{ source.label }}</span><span class="muted">{{ source.byte_count }} bytes</span></summary>
+    <div class="document-toolbar"><a href="{{ url_for('evidence_file', capture_id=capture.id, entry_id=source.id) }}" target="_blank" rel="noopener noreferrer">Open complete source ↗</a><code title="{{ source.sha256 }}">SHA-256 {{ source.sha256[:12] }}…</code></div>
+    <pre><code>{{ source.preview }}</code></pre>
+    {% if source.truncated %}<p class="preview-note">Open the complete source to see the remaining lines.</p>{% endif %}
+  </details>
+  {% else %}<div class="notice-panel">No supported configuration files could be archived for this revision.</div>{% endfor %}
+</section>
+
+<section id="provenance" class="evidence-section provenance-panel">
+  <p class="eyebrow">AN AUDITABLE STARTING POINT</p><h2>Capture provenance</h2>
+  <dl class="provenance-list"><dt>Capture ID</dt><dd><code>{{ capture.id }}</code></dd><dt>Captured at</dt><dd>{{ capture.captured_at }}</dd><dt>Reported head SHA</dt><dd><code>{{ capture.source_ref }}</code></dd><dt>Archived files</dt><dd>{{ capture.entries|length }}</dd><dt>GitHub artifacts</dt><dd>{{ capture.artifacts|length }} listed at run level; artifacts may span attempts.</dd></dl>
+  <p class="helper">File checksums are verified against the saved manifest before serving their contents. Check the complete archive locally:</p>
+  <pre class="command"><code>python -m buildtrace verify {{ capture.id }}</code></pre>
+  {% if api_entries %}<details class="api-documents"><summary>Original GitHub API responses ({{ api_entries|length }})</summary><ul>{% for entry in api_entries %}<li><a href="{{ url_for('evidence_file', capture_id=capture.id, entry_id=entry.id) }}">{{ entry.label }}</a></li>{% endfor %}</ul></details>{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}Experiment dashboard · BuildTrace{% endblock %}
+{% block milestone %}02 / Experiment dashboard{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+<script src="{{ url_for('static', filename='dashboard.js') }}" defer></script>
+{% endblock %}
+{% block content %}
+<div class="dashboard-shell">
+  <section class="dashboard-heading">
+    <div>
+      <p class="eyebrow">{% if dashboard and dashboard.validation in ('local-expression', 'local-repository') %}LIVE MODEL + LOCAL PYTHON CHECKS{% elif dashboard and dashboard.classification in ('synthetic-demo', 'generated-example') %}GENERATED EXAMPLE DATA{% else %}REAL MODEL + GITHUB ACTIONS RESULTS{% endif %}</p>
+      <h1>Experiment dashboard</h1>
+      <p>{% if dashboard and dashboard.classification in ('synthetic-demo', 'generated-example') %}Illustrative comparison with generated outcomes, usage and cost estimates.{% else %}Every recorded attempt, with comparison metrics, token usage and estimated model cost.{% endif %}</p>
+    </div>
+    <form method="get" action="{{ url_for('dashboard_page') }}" class="study-picker">
+      <label for="study">Experiment</label>
+      <select id="study" name="study" onchange="this.form.submit()">
+        {% for item in studies %}
+        <option value="{{ item.slug }}" {% if dashboard and item.slug == dashboard.slug %}selected{% endif %}>{{ item.id }} ({{ 'exploratory' if item.id == 'exploratory-25-development-v2' else item.classification }})</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Open</button>
+    </form>
+  </section>
+
+  {% if not dashboard %}
+  <div class="dashboard-empty">No saved experiment is available yet. Recorded trials will appear here after an experiment starts.</div>
+  {% else %}
+  <div class="dashboard-meta">
+    <span class="dashboard-badge {{ dashboard.classification }}">{{ 'generated data' if dashboard.classification in ('synthetic-demo', 'generated-example') else dashboard.classification }}</span>
+    <strong>{{ dashboard.id }}</strong>
+    <span>{{ dashboard.planned_cases }} problems · {{ dashboard.repetitions }} attempts per agent · {{ dashboard.model }}</span>
+    <a href="{{ url_for('dashboard_csv', study=dashboard.slug) }}">Download trial CSV</a>
+    <a href="{{ url_for('dashboard_data', study=dashboard.slug) }}">JSON data</a>
+    <a href="{{ url_for('dashboard_download', kind='results', study=dashboard.slug) }}">Raw results</a>
+    <a href="{{ url_for('dashboard_download', kind='experiment', study=dashboard.slug) }}">Experiment spec</a>
+    <button type="button" id="dashboard-refresh">Refresh</button>
+  </div>
+  <div class="progress-heading"><strong>{{ dashboard.completed_trials }} / {{ dashboard.planned_trials }} {% if dashboard.classification in ('synthetic-demo', 'generated-example') %}example entries generated{% else %}trials recorded{% endif %}</strong><span>{% if dashboard.classification in ('synthetic-demo', 'generated-example') %}Generated {{ dashboard.updated_at[:19].replace('T', ' ') }} UTC{% else %}{{ dashboard.started_trials }} started · last result {{ dashboard.updated_at[:19].replace('T', ' ') }} UTC{% endif %}</span></div>
+  <div class="progress-track"><div style="width: {{ dashboard.progress.percent or 0 }}%"></div></div>
+  {% if dashboard.validation == 'local-repository' %}
+  <p class="dashboard-caution">Agents diagnose failing repository snapshots and write patches. Local verification checks behavior, dependencies, and installed builds. The 50 scenarios combine defects from three lab projects.</p>
+  {% if dashboard.calibration %}
+  <section class="dashboard-section" aria-labelledby="calibration-heading">
+    <div class="dashboard-section-head">
+      <h2 id="calibration-heading">Local benchmark checks</h2>
+      <p>These checks validate the starting snapshots and reference repairs before agent trials.</p>
+    </div>
+    <div class="usage-hero">
+      <div><span>Broken snapshots reproduced</span><strong>{{ dashboard.calibration.first_failure_counts.values() | sum }} / {{ dashboard.planned_cases }}</strong></div>
+      <div><span>Reference projects passed</span><strong>{{ dashboard.calibration.reference_passes | length }}</strong></div>
+      <div><span>Agent trials recorded</span><strong>{{ dashboard.completed_trials }} / {{ dashboard.planned_trials }}</strong></div>
+    </div>
+  </section>
+  {% endif %}
+  {% elif dashboard.validation == 'local-expression' %}
+  <p class="dashboard-caution">This development study uses 50 bounded expression repairs across 10 families. The model picks a candidate edit and fixed Python checks score it locally. Each family has five related variants.</p>
+  {% elif dashboard.classification == 'exploratory' %}
+  <p class="dashboard-caution">Exploratory comparison. These cases were opened after the earlier history-use gate failed. A higher score here is useful evidence, but it is not an approved held-out superiority result.</p>
+  {% elif dashboard.classification in ('synthetic-demo', 'generated-example') %}
+  <p class="dashboard-caution">Generated example data: all 225 outcomes and usage figures on this page were created for illustration. No solver or CI trial produced these results. This comparison is not evidence that WikiTrace outperforms the baselines.</p>
+  {% endif %}
+
+  <section class="dashboard-section">
+    <div class="dashboard-section-head"><div><p class="eyebrow">01 / OUTCOMES</p><h2>{% if dashboard.classification in ('synthetic-demo', 'generated-example') %}Illustrative repairs{% else %}Verified repairs{% endif %}</h2></div><p>Rates use completed trials. Pending attempts stay visible in the progress count.</p></div>
+    <div class="mode-grid">
+      {% for mode, item in dashboard.modes.items() %}
+      <article class="mode-card mode-{{ mode }}">
+        <div class="mode-card-top"><h3>{{ item.label }}</h3><span>{{ item.completed }} / {{ item.planned }} {% if dashboard.classification in ('synthetic-demo', 'generated-example') %}generated{% else %}recorded{% endif %}</span></div>
+        <div class="mode-score">{% if item.success.percent is not none %}{{ item.success.percent }}<small>%</small>{% else %}—{% endif %}</div>
+        <div class="mode-count">{{ item.success.numerator }} {% if dashboard.classification in ('synthetic-demo', 'generated-example') %}illustrative fixes{% else %}verified fixes{% endif %} / {{ item.success.denominator }} completed</div>
+        <div class="mode-bar"><div style="width: {{ item.success.percent or 0 }}%"></div></div>
+        <div class="mode-facts">
+          <div><span>Gain</span><strong>{% if item.gain and item.gain.denominator %}{{ item.gain.numerator }}/{{ item.gain.denominator }}{% else %}N/A{% endif %}</strong></div>
+          <div><span>Regression</span><strong>{% if item.regression and item.regression.denominator %}{{ item.regression.numerator }}/{{ item.regression.denominator }}{% else %}N/A{% endif %}</strong></div>
+          <div><span>Infra errors</span><strong>{{ item.outcomes.get('infra-error', 0) }}</strong></div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% if dashboard.pairs %}
+    <div class="paired-strip">
+      {% for baseline, item in dashboard.pairs.items() %}
+      <div><strong>WikiTrace vs {{ dashboard.modes[baseline].label }}</strong><span>{{ item.get('wikitrace_win', 0) }} wins · {{ item.get('wikitrace_loss', 0) }} losses · {{ item.get('tie', 0) }} ties · {{ item.get('infrastructure_affected', 0) }} infra-affected pairs</span></div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="dashboard-section">
+    <div class="dashboard-section-head"><div><p class="eyebrow">02 / MEASUREMENTS</p><h2>Mode comparison</h2></div><p>Unreviewed patch changes are shown separately, never counted as zero.</p></div>
+    <div class="dashboard-table-wrap">
+      <table class="dashboard-table comparison-table">
+        <thead><tr><th>Agent</th><th>Fixes</th><th>Gain</th><th>Regression</th><th>Unnecessary / reviewed</th><th>Unreviewed</th><th>Median successful wall / active</th><th>History reads / raw</th><th>Adopted / reviewed (pending)</th><th>Model calls</th><th>Tokens</th><th>API estimate</th></tr></thead>
+        <tbody>
+        {% for mode, item in dashboard.modes.items() %}
+        <tr>
+          <th>{{ item.label }}</th><td>{{ item.success.numerator }}/{{ item.success.denominator }}</td>
+          <td>{% if item.gain and item.gain.denominator %}{{ item.gain.numerator }}/{{ item.gain.denominator }}{% else %}N/A{% endif %}</td>
+          <td>{% if item.regression and item.regression.denominator %}{{ item.regression.numerator }}/{{ item.regression.denominator }}{% else %}N/A{% endif %}</td>
+          <td>{{ item.unnecessary_hunks }}/{{ item.total_hunks - item.unreviewed_hunks }}</td><td>{{ item.unreviewed_hunks }}</td>
+          <td>{% if item.median_success_wall_seconds is not none %}{{ item.median_success_wall_seconds }} / {{ item.median_success_active_seconds }} s{% else %}N/A{% endif %}</td>
+          <td>{{ item.history_requests }} / {{ item.raw_deliveries }}</td><td>{{ item.reviewed_adopted_effects }} / {{ item.reviewed_evidence_bursts }} ({{ item.evidence_bursts - item.reviewed_evidence_bursts }} pending)</td>
+          <td>{{ item.model_calls }}</td><td>{{ "{:,}".format(item.tokens.billable_tokens) }}</td>
+          <td>{% if item.unknown_cost_trials %}partial{% else %}${{ "%.4f"|format(item.cost_usd) }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="dashboard-note">Gain counts fixes on cases all no-memory attempts failed. Regression counts failures on cases all no-memory attempts solved. Mixed, incomplete or infrastructure-affected no-memory references are not labeled. Reasoning tokens are included in output tokens.</p>
+  </section>
+
+  <section class="dashboard-section">
+    <div class="dashboard-section-head"><div><p class="eyebrow">03 / USAGE</p><h2>Tokens and estimated cost</h2></div><p>{% if dashboard.classification in ('synthetic-demo', 'generated-example') %}Generated token counts and illustrative cost estimates.{% else %}From recorded solver API usage; refresh to include newly completed trials.{% endif %}</p></div>
+    <div class="usage-hero"><div><span>Estimated solver API cost</span><strong>${{ "%.4f"|format(dashboard.total_cost_usd) }}</strong></div><div><span>Input + output tokens</span><strong>{{ "{:,}".format(dashboard.total_tokens) }}</strong></div><div><span>Cost coverage</span><strong>{{ dashboard.completed_trials - dashboard.unknown_cost_trials }}/{{ dashboard.completed_trials }}</strong></div></div>
+    <div class="dashboard-table-wrap">
+      <table class="dashboard-table usage-table">
+        <thead><tr><th>Agent</th><th>Input</th><th>Cached input</th><th>Uncached input</th><th>Output</th><th>Reasoning (inside output)</th><th>Estimated USD</th></tr></thead>
+        <tbody>{% for mode, item in dashboard.modes.items() %}<tr><th>{{ item.label }}</th><td>{{ "{:,}".format(item.tokens.input_tokens) }}</td><td>{{ "{:,}".format(item.tokens.cached_input_tokens) }}</td><td>{{ "{:,}".format(item.tokens.uncached_input_tokens) }}</td><td>{{ "{:,}".format(item.tokens.output_tokens) }}</td><td>{{ "{:,}".format(item.tokens.reasoning_tokens) }}</td><td>${{ "%.4f"|format(item.cost_usd) }}</td></tr>{% endfor %}</tbody>
+      </table>
+    </div>
+    <p class="dashboard-note">Estimate uses {{ dashboard.pricing.model }} Standard text rates checked {{ dashboard.pricing.checked_on }}: $0.10/1M uncached input, $0.01/1M cached input, $0.50/1M output. Requests above 272,000 input tokens use the published long-context multipliers. <a href="{{ dashboard.pricing.source }}" target="_blank" rel="noopener">Pricing source</a>. This is not an invoice. Excludes unobserved cache-write charges, CI compute, taxes/regional premiums, and separate review or memory-compilation calls.</p>
+  </section>
+
+  <section class="dashboard-section">
+    <div class="dashboard-section-head"><div><p class="eyebrow">04 / CASES</p><h2>Problem-by-problem outcomes</h2></div><p>{% if dashboard.validation == 'local-repository' %}Scenarios within each project share some underlying defects.{% elif dashboard.validation == 'local-expression' %}Five related variants per repair family.{% else %}The composite case overlaps four standard cases and is not independent of them.{% endif %}</p></div>
+    <div class="dashboard-filters"><label for="case-search">Find a case</label><input id="case-search" type="search" placeholder="ID, title or family"><label for="domain-filter">Domain</label><select id="domain-filter"><option value="">All domains</option>{% for domain in dashboard.cases|map(attribute='domain')|unique %}<option value="{{ domain }}">{{ domain }}</option>{% endfor %}</select></div>
+    <div class="dashboard-table-wrap">
+      <table class="dashboard-table case-table" id="case-table">
+        <thead><tr><th>Problem</th><th>Domain / family</th><th>No-memory reference</th>{% for mode in dashboard.modes %}<th>{{ dashboard.modes[mode].label }} attempts</th>{% endfor %}<th>Recorded</th><th>Cost</th></tr></thead>
+        <tbody>
+        {% for item in dashboard.cases %}
+        <tr data-search="{{ (item.id ~ ' ' ~ item.title ~ ' ' ~ item.family)|lower }}" data-domain="{{ item.domain }}">
+          <th><strong>{{ item.id }}</strong><small>{{ item.title }}{% if item.composite %} · composite{% endif %}</small></th>
+          <td>{{ item.domain }}<small>{{ item.family }}</small></td><td>{{ item.label|replace('-', ' ') }}</td>
+          {% for mode in dashboard.modes %}
+          <td class="attempt-cell">{% for result in item.cells[mode] %}<span class="attempt attempt-{{ result }}" title="Attempt {{ loop.index }}: {{ result }}">{{ '✓' if result == 'solved' else '×' if result == 'unsolved' else '!' if result == 'infra-error' else '·' }}</span>{% endfor %}</td>
+          {% endfor %}
+          <td>{{ item.completed }}/{{ item.planned }}</td><td>${{ "%.4f"|format(item.cost_usd) }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="dashboard-section">
+    <div class="dashboard-section-head"><div><p class="eyebrow">05 / TRIAL LOG</p><h2>Every completed attempt</h2></div><p>Use filters, then download the CSV for the full numeric record.</p></div>
+    <div class="dashboard-filters"><label for="trial-mode">Agent</label><select id="trial-mode"><option value="">All</option>{% for mode, item in dashboard.modes.items() %}<option value="{{ mode }}">{{ item.label }}</option>{% endfor %}</select><label for="trial-outcome">Outcome</label><select id="trial-outcome"><option value="">All</option><option value="solved">Verified fix</option><option value="unsolved">Agent failure</option><option value="infra-error">Infrastructure</option><option value="not-reproduced">Not reproduced</option></select><span id="trial-filter-count"></span></div>
+    <div class="dashboard-table-wrap">
+      <table class="dashboard-table trial-table" id="trial-table">
+        <thead><tr><th>Problem</th><th>Agent</th><th>Try</th><th>Outcome</th><th>Wall / CI / active</th><th>Calls / patches</th><th>Input / cached / output</th><th>Reasoning</th><th>History reads / raw</th><th>Patch review</th><th>Cost</th><th>Evidence</th></tr></thead>
+        <tbody>{% for row in dashboard.trials %}
+        <tr data-mode="{{ row.mode }}" data-outcome="{{ row.outcome }}" data-case="{{ row.task_id }}">
+          <th>{{ row.task_id }}</th><td>{{ dashboard.modes[row.mode].label }}</td><td>{{ row.trial + 1 }}</td>
+          <td><span class="outcome-tag outcome-{{ row.outcome }}">{{ row.outcome|replace('-', ' ') }}</span></td>
+          <td>{{ "%.0f"|format(row.wall_seconds) }} / {{ "%.0f"|format(row.ci_wait_seconds) }} / {{ "%.0f"|format(row.active_seconds) }} s</td>
+          <td>{{ row.model_calls }} / {{ row.patch_attempts }}</td>
+          <td>{{ "{:,}".format(row.input_tokens) }} / {{ "{:,}".format(row.cached_input_tokens) }} / {{ "{:,}".format(row.output_tokens) }}</td>
+          <td>{{ "{:,}".format(row.reasoning_tokens) }}</td>
+          <td>{{ row.history_requests }} / {{ row.raw_deliveries }}</td>
+          <td>{{ row.unnecessary_hunks }} unnecessary · {{ row.unreviewed_hunks }} unreviewed</td>
+          <td>{% if row.cost_usd is not none %}${{ "%.4f"|format(row.cost_usd) }}{% else %}N/A{% endif %}</td>
+          <td>{% if row.ci_url %}<a href="{{ row.ci_url }}" target="_blank" rel="noopener">CI</a>{% endif %}{% if row.oracle_url %} · <a href="{{ row.oracle_url }}" target="_blank" rel="noopener">oracle</a>{% endif %}{% if row.trajectory_available %} · <a href="{{ url_for('dashboard_trajectory', trial_id=row.id, study=dashboard.slug) }}">trace</a>{% endif %}</td>
+        </tr>{% endfor %}</tbody>
+      </table>
+    </div>
+    <p class="dashboard-note">{% if dashboard.classification in ('synthetic-demo', 'generated-example') %}Each row is generated example data. The CSV, JSON and raw results carry a generated-data marker. No CI evidence or execution trace is available.{% else %}Each table row is a saved run. The <a href="{{ url_for('dashboard_data', study=dashboard.slug) }}">JSON endpoint</a> includes stop reasons, packet insight IDs, evidence counts and source file paths for every row. Results are read-only; this page never starts a solver or changes a trial.{% endif %}</p>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

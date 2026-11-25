@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools==75.8.2", "wheel==0.45.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "buildtrace-agent"
+version = "0.1.0"
+description = "Evidence-first investigation of GitHub Actions build failures."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "flask>=3.1,<4",
+    "httpx>=0.28,<0.29",
+    "pydantic>=2.10,<3",
+    "python-dotenv>=1.1,<2",
+    "wikitrace @ git+https://github.com/yukyeongleee/wikitrace.git@25a83679af0eb67ab3c835ab920d3a243fb80845",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3,<9", "build>=1.2,<2"]
+
+[project.scripts]
+buildtrace = "buildtrace.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+buildtrace = ["templates/*.html", "static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
