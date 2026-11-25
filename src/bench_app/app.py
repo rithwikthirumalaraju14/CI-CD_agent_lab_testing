@@ -36,9 +36,9 @@ def run(request, root):
             raise ValueError("tested and built dependencies differ")
         return {"lock": request["build_lock"]}
     if operation == "deploy_identity":
-        if request["built_sha"] != request["deployed_sha"]:
+        if not (request["tested_sha"] == request["built_sha"] == request["deployed_sha"]):
             raise ValueError("source revision mismatch")
-        if False:
+        if request["built_digest"] != request["deployed_digest"]:
             raise ValueError("artifact digest mismatch")
         return {"deployed_sha": request["tested_sha"], "digest": request["built_digest"]}
     if operation == "rollout":
