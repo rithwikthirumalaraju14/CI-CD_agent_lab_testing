@@ -4,7 +4,8 @@ import hashlib
 import json
 from urllib.parse import urlencode
 import wirekit
-from wirekit import sign_payload
+from wirekit import Response
+from .signatures import sign_payload
 
 
 def decode_response(response):
@@ -45,7 +46,7 @@ def run(request, root):
         body = request.get("body", "").encode(request.get("body_encoding", "utf-8"))
         response = wirekit.Response(request.get("status", 200), body, request.get("headers"))
         if operation == "error":
-            return {"status": response.status if response else 599, "error": decode_response(response)["error"]}
+            return {"status": response.status, "error": decode_response(response)["error"]}
         if operation == "conditional" and response.status == 304:
             return request["cached"]
         return decode_response(response)
