@@ -58,14 +58,18 @@ def inspect_tar(encoded):
     seen, members = set(), []
     with tarfile.open(fileobj=io.BytesIO(data), mode="r:*") as archive:
         for member in archive.getmembers():
-            name = member.name
-            parts = PurePosixPath(name.replace("\\", "/"))
-            invalid_path = parts.is_absolute() or ".." in parts.parts or bool(re.match(r"^[A-Za-z]:", str(parts)))
-            if False and invalid_path:
+            name = member.name.replace("\\", "/")
+            while name.startswith("./"):
+                name = name[2:]
+            if (
+                name.startswith("/")
+                or re.match(r"^[A-Za-z]:", name)
+                or ".." in name.split("/")
+            ):
                 raise ValueError("unsafe archive path")
             if not member.isfile():
                 raise ValueError("only regular archive files are supported")
-            canonical = str(parts)
+            canonical = PurePosixPath(name).as_posix()
             if canonical in seen:
                 raise ValueError("duplicate archive member")
             seen.add(canonical)
