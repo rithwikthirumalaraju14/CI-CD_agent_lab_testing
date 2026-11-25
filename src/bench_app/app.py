@@ -28,7 +28,7 @@ def run(request, root):
         healthy = request["port_open"] and request["health"] == "ok"
         return {"ready": healthy, "job_success": healthy}
     if operation == "release_provenance":
-        if request["source_sha"] != request["build_sha"]:
+        if request["tag_sha"] != request["build_sha"] or request["source_sha"] != request["build_sha"]:
             raise ValueError("release source mismatch")
         return {"published_sha": request["tag_sha"]}
     if operation == "environment_lock":
