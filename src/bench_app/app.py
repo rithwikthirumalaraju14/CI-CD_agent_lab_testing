@@ -13,8 +13,8 @@ def decode_response(response):
     for parameter in content_type.split(";")[1:]:
         key, _, value = parameter.strip().partition("=")
         if key.lower() == "charset":
-            charset = value.strip('"')
-    return json.loads(response.body.decode("utf-8"))
+            charset = value.strip().strip('"')
+    return json.loads(response.body.decode(charset))
 
 
 def retry_delay(value, now):
@@ -29,7 +29,7 @@ def run(request, root):
     deployment = json.loads((root / "context/deployment.json").read_text(encoding="utf-8"))
     if int(wirekit.__version__.split(".")[0]) != deployment["wire_major"]:
         raise ValueError("wirekit major does not match context/deployment.json")
-    client = wirekit.Client("local-fixture-token", timeout=deployment["timeout_seconds"])
+    client = wirekit.Client(credential="local-fixture-token", timeout_seconds=deployment["timeout_seconds"])
     operation = request.get("operation", "sync")
     if operation == "sync":
         pages = request.get("pages", {"": {"items": [], "next_cursor": None}})
@@ -62,7 +62,7 @@ def run(request, root):
         max_attempts = request.get("max_attempts", deployment["max_attempts"])
         for attempt in range(1, max_attempts + 1):
             status = plan[min(attempt - 1, len(plan) - 1)]
-            if status < 500:
+            if not 500 <= status < 600:
                 return {"status": status, "attempts": attempt}
         raise ValueError("retry exhausted")
     if operation == "stream":
