@@ -1,0 +1,230 @@
+[
+  {
+    "error": null,
+    "expected": {
+      "count": 2,
+      "items": [
+        1,
+        2
+      ]
+    },
+    "name": "cursor_multiple_hops",
+    "request": {
+      "pages": {
+        "": {
+          "items": [],
+          "next_cursor": 0
+        },
+        "0": {
+          "items": [
+            1
+          ],
+          "next_cursor": "end"
+        },
+        "end": {
+          "items": [
+            2
+          ],
+          "next_cursor": null
+        }
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "name": "über"
+    },
+    "name": "quoted_upper_charset",
+    "request": {
+      "body": "{\"name\":\"über\"}",
+      "body_encoding": "iso-8859-1",
+      "headers": {
+        "content-type": "application/json; Charset=\"ISO-8859-1\""
+      },
+      "operation": "decode"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "error": "maintenance",
+      "status": 503
+    },
+    "name": "error_not_absence",
+    "request": {
+      "body": "{\"error\":\"maintenance\"}",
+      "operation": "error",
+      "status": 503
+    }
+  },
+  {
+    "error": null,
+    "expected": {},
+    "name": "cache_empty_object",
+    "request": {
+      "cached": {},
+      "operation": "conditional",
+      "status": 304
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "signature": "d5ab299604242f98cb112fe2ebb339cc0e286f20d1f817f9f9f4f7ac3feffdee"
+    },
+    "name": "signature_unicode",
+    "request": {
+      "operation": "sign",
+      "payload": {
+        "a": true,
+        "é": [
+          1,
+          null
+        ]
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "key": "c26af2a46d6e4cb7dd8fb5dd48dd0b6886fed0246faf5ccbb884e585c61ccc31"
+    },
+    "name": "key_insertion_independent",
+    "request": {
+      "operation": "key",
+      "payload": {
+        "a": "雪",
+        "z": 0
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "key": "b974e9bf66d8405a008971d93ccb8a3571b9dc8e24eb14ce09c56ef266073898"
+    },
+    "name": "key_nested_canonical",
+    "request": {
+      "operation": "key",
+      "payload": {
+        "b": {
+          "a": 1,
+          "z": 2
+        }
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "seconds": 0
+    },
+    "name": "past_date_clamps",
+    "request": {
+      "now": "2025-01-01T00:00:00Z",
+      "operation": "retry_delay",
+      "retry_after": "Tue, 31 Dec 2024 23:59:00 GMT"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "seconds": 105
+    },
+    "name": "date_not_constant",
+    "request": {
+      "now": "2025-01-01T00:00:15Z",
+      "operation": "retry_delay",
+      "retry_after": "Wed, 01 Jan 2025 00:02:00 GMT"
+    }
+  },
+  {
+    "error": "retry exhausted",
+    "expected": null,
+    "name": "one_attempt_only",
+    "request": {
+      "max_attempts": 1,
+      "operation": "retry",
+      "statuses": [
+        503,
+        200
+      ]
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "attempts": 3,
+      "status": 204
+    },
+    "name": "success_on_last_attempt",
+    "request": {
+      "operation": "retry",
+      "statuses": [
+        503,
+        503,
+        204
+      ]
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "label": "雪"
+    },
+    "name": "unicode_stream",
+    "request": {
+      "body": "{\"label\":\"雪\"}",
+      "operation": "stream"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "query": "b=&b=%26"
+    },
+    "name": "empty_query_list",
+    "request": {
+      "operation": "query",
+      "params": {
+        "a": [],
+        "b": [
+          "",
+          "&"
+        ]
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "accepted": [
+        "ok"
+      ],
+      "failed": [
+        "z",
+        "a"
+      ],
+      "status": 207
+    },
+    "name": "failed_batch_order",
+    "request": {
+      "operation": "batch",
+      "results": [
+        {
+          "id": "z",
+          "status": 400
+        },
+        {
+          "id": "a",
+          "status": 503
+        },
+        {
+          "id": "ok",
+          "status": 202
+        }
+      ]
+    }
+  }
+]
