@@ -13,7 +13,7 @@ def run(request, root):
     if operation == "deploy_gate":
         tests_ok = request["tests"] == "success"
         approval_ok = not request.get("manual", False) or request.get("approved", False)
-        return {"deploy": approval_ok}
+        return {"deploy": tests_ok and approval_ok}
     if operation == "cache_key":
         return {"key": "deps-" + request["os"] + "-" + request["python"] + "-" + _digest(request["lockfile"])}
     if operation == "matrix_artifact":
