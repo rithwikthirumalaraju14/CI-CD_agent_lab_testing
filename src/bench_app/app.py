@@ -20,15 +20,21 @@ def decode_response(response):
 def retry_delay(value, now):
     try:
         return max(0, int(value))
-    except ValueError:
-        return 0
+    except (TypeError, ValueError):
+        try:
+            retry_at = parsedate_to_datetime(value)
+            if retry_at.tzinfo is None:
+                retry_at = retry_at.replace(tzinfo=timezone.utc)
+            return max(0, int((retry_at.astimezone(timezone.utc) - now).total_seconds()))
+        except (TypeError, ValueError, OverflowError):
+            return 0
 
 
 def run(request, root):
     deployment = json.loads((root / "context/deployment.json").read_text(encoding="utf-8"))
     if int(wirekit.__version__.split(".")[0]) != deployment["wire_major"]:
         raise ValueError("wirekit major does not match context/deployment.json")
-    client = wirekit.Client("local-fixture-token", timeout=deployment["timeout_seconds"])
+    client = wirekit.Client(credential="local-fixture-token", timeout_seconds=deployment["timeout_seconds"])
     operation = request.get("operation", "sync")
     if operation == "sync":
         pages = request.get("pages", {"": {"items": [], "next_cursor": None}})
@@ -51,7 +57,7 @@ def run(request, root):
     if operation == "sign":
         return {"signature": sign_payload(request["payload"])}
     if operation == "key":
-        payload = json.dumps(request["payload"], sort_keys=False, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+        payload = json.dumps(request["payload"], sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
         return {"key": hashlib.sha256(payload).hexdigest()}
     if operation == "retry_delay":
         now = datetime.fromisoformat(request["now"].replace("Z", "+00:00")).astimezone(timezone.utc)
