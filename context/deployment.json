@@ -1,0 +1,9 @@
+{
+  "archive_timestamp": "2024-01-01T00:00:00",
+  "distribution": [
+    "wheel",
+    "sdist"
+  ],
+  "resource": "bench_app/data/policy.json",
+  "unicode_grouping": "NFC"
+}
