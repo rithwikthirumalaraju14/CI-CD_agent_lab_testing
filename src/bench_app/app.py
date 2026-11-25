@@ -94,15 +94,15 @@ def run(request, root):
     if operation == "groups":
         groups = {}
         for row in request["rows"]:
-            name = row["name"]
+            name = unicodedata.normalize("NFC", row["name"])
             groups[name] = groups.get(name, 0) + row["count"]
         return {"groups": groups}
     if operation == "weighted":
         count = sum(row["count"] for row in request["rows"])
         if not count:
             return {"mean_ms": None}
-        total = sum(Decimal(str(row["mean_ms"])) for row in request["rows"])
-        return {"mean_ms": str((total / len(request["rows"])).quantize(Decimal("0.001")))}
+        total = sum(Decimal(str(row["mean_ms"])) * row["count"] for row in request["rows"])
+        return {"mean_ms": str((total / count).quantize(Decimal("0.001")))}
     if operation == "releases":
         return {"versions": sorted(request["versions"], key=version_key)}
     if operation == "digest":
