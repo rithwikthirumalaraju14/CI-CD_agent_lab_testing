@@ -25,8 +25,8 @@ def run(request, root):
         checks = ["tests", "build"] if build_needed else ["tests"]
         return {"checks": checks, "release": all(request["status"].get(check) == "success" for check in checks)}
     if operation == "readiness":
-        healthy = request["port_open"]
-        return {"ready": healthy, "job_success": True}
+        ready = request["port_open"] and request["health"] == "ok"
+        return {"ready": ready, "job_success": ready}
     if operation == "release_provenance":
         if request["tag_sha"] != request["build_sha"] or request["source_sha"] != request["build_sha"]:
             raise ValueError("release source mismatch")
