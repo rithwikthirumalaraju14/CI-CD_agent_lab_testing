@@ -13,7 +13,7 @@ def decode_response(response):
     for parameter in content_type.split(";")[1:]:
         key, _, value = parameter.strip().partition("=")
         if key.lower() == "charset":
-            charset = value.strip('"')
+            charset = value.strip('\"')
     return json.loads(response.body.decode(charset))
 
 
@@ -52,7 +52,7 @@ def run(request, root):
     if operation == "sign":
         return {"signature": sign_payload(request["payload"])}
     if operation == "key":
-        payload = json.dumps(request["payload"], sort_keys=False, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+        payload = json.dumps(request["payload"], sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
         return {"key": hashlib.sha256(payload).hexdigest()}
     if operation == "retry_delay":
         now = datetime.fromisoformat(request["now"].replace("Z", "+00:00")).astimezone(timezone.utc)
@@ -62,9 +62,9 @@ def run(request, root):
         max_attempts = request.get("max_attempts", deployment["max_attempts"])
         for attempt in range(1, max_attempts + 1):
             status = plan[min(attempt - 1, len(plan) - 1)]
-            if status < 500:
+            if not 500 <= status < 600:
                 return {"status": status, "attempts": attempt}
-        return {"status": status, "attempts": max_attempts}
+        raise ValueError("retry exhausted")
     if operation == "stream":
         with client.open(request["body"].encode("utf-8")) as response:
             body = response.body
@@ -73,7 +73,7 @@ def run(request, root):
         return {"query": urlencode(sorted(request["params"].items()), doseq=True)}
     if operation == "batch":
         successes = [item["id"] for item in request["results"] if item["status"] < 400]
-        failures = []
+        failures = [item["id"] for item in request["results"] if item["status"] >= 400]
         status = 207 if successes and failures else (502 if failures else 200)
         return {"status": status, "accepted": successes, "failed": failures}
     raise ValueError("unknown operation")
