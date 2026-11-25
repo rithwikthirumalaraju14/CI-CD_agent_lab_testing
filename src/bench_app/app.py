@@ -52,7 +52,7 @@ def run(request, root):
     if operation == "sign":
         return {"signature": sign_payload(request["payload"])}
     if operation == "key":
-        payload = json.dumps(request["payload"], sort_keys=False, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+        payload = json.dumps(request["payload"], sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
         return {"key": hashlib.sha256(payload).hexdigest()}
     if operation == "retry_delay":
         now = datetime.fromisoformat(request["now"].replace("Z", "+00:00")).astimezone(timezone.utc)
@@ -64,7 +64,7 @@ def run(request, root):
             status = plan[min(attempt - 1, len(plan) - 1)]
             if status < 500:
                 return {"status": status, "attempts": attempt}
-        return {"status": status, "attempts": max_attempts}
+        raise ValueError("retry exhausted")
     if operation == "stream":
         with client.open(request["body"].encode("utf-8")) as response:
             body = response.body
@@ -73,7 +73,7 @@ def run(request, root):
         return {"query": urlencode(sorted(request["params"].items()), doseq=True)}
     if operation == "batch":
         successes = [item["id"] for item in request["results"] if item["status"] < 400]
-        failures = []
+        failures = [item["id"] for item in request["results"] if item["status"] >= 400]
         status = 207 if successes and failures else (502 if failures else 200)
         return {"status": status, "accepted": successes, "failed": failures}
     raise ValueError("unknown operation")
