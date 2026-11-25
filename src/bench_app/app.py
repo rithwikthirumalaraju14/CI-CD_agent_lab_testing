@@ -40,8 +40,8 @@ def duration_ms(value):
     if not match or not any(match.groups()):
         raise ValueError("unsupported ISO duration")
     hours, minutes, seconds = (Decimal(part or "0") for part in match.groups())
-    total = hours + minutes + seconds
-    return int(total * 1000)
+    total_seconds = hours * 3600 + minutes * 60 + seconds
+    return int(total_seconds * 1000)
 
 
 def version_key(value):
@@ -87,7 +87,7 @@ def run(request, root):
     if operation == "csv":
         stream = io.StringIO(newline="")
         writer = csv.writer(stream, lineterminator="\r\n")
-        stream.write("\r\n".join(",".join(str(value) for value in row) for row in request["rows"]) + "\r\n")
+        writer.writerows(request["rows"])
         return {"csv": stream.getvalue()}
     if operation == "duration":
         return {"milliseconds": duration_ms(request["value"])}
