@@ -136,6 +136,10 @@ def test_v2_modes_have_identical_guidance_and_identical_selected_packets(setup, 
         records[mode], model = run(setup, tmp_path, mode, [plan(), patch()])
         calls[mode] = model.calls[0]
     assert len({call[0][0]["content"] for call in calls.values()}) == 1
+    shared_guidance = calls[AgentMode.WIKITRACE][0][0]["content"]
+    assert "If read_historical_evidence is available" in shared_guidance
+    assert 'layer="raw", document="solver.full.jsonl"' in shared_guidance
+    assert "Compilation and metadata alone do not verify the original observation" in shared_guidance
     assert calls[AgentMode.INSIGHTS_ONLY][0][1] == calls[AgentMode.WIKITRACE][0][1]
     assert "<insight " not in calls[AgentMode.NO_MEMORY][0][1]["content"]
     first, second = records[AgentMode.INSIGHTS_ONLY], records[AgentMode.WIKITRACE]
@@ -144,6 +148,7 @@ def test_v2_modes_have_identical_guidance_and_identical_selected_packets(setup, 
     assert first.insights_sha256 == setup[3].insights_sha256 != first.packet_sha256
     common = calls[AgentMode.INSIGHTS_ONLY][1]["tools"]
     assert calls[AgentMode.WIKITRACE][1]["tools"][:-1] == common
+    assert "original successful file/log observation" in calls[AgentMode.WIKITRACE][1]["tools"][-1]["function"]["description"]
 
 
 def test_packet_query_ignores_operator_labels_and_preserves_whole_insights(setup):
