@@ -31,6 +31,10 @@ jobs:
           python -m pip install --editable ".[dev]" --constraint ci/constraints.txt
       - name: Check dependency consistency
         run: python -m pip check
+      - name: Prepare offline test wheels
+        run: |
+          python -m pip download --dest "$RUNNER_TEMP/offline-tool-wheels" --constraint ci/constraints.txt "pytest==8.3.5" "build==1.2.2.post1"
+          echo "PIP_FIND_LINKS=$RUNNER_TEMP/offline-tool-wheels" >> "$GITHUB_ENV"
       - name: Run tests
         run: python -m pytest --junitxml=artifacts/pytest.xml
       - name: Build distributable
