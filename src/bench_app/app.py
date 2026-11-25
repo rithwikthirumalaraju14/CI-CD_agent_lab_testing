@@ -4,7 +4,7 @@ import hashlib
 import json
 from urllib.parse import urlencode
 import wirekit
-from wirekit import sign_payload
+from .signatures import sign_payload
 
 
 def decode_response(response):
@@ -13,7 +13,7 @@ def decode_response(response):
     for parameter in content_type.split(";")[1:]:
         key, _, value = parameter.strip().partition("=")
         if key.lower() == "charset":
-            charset = value.strip('"')
+            charset = value.strip('\"')
     return json.loads(response.body.decode(charset))
 
 
@@ -29,7 +29,7 @@ def run(request, root):
     deployment = json.loads((root / "context/deployment.json").read_text(encoding="utf-8"))
     if int(wirekit.__version__.split(".")[0]) != deployment["wire_major"]:
         raise ValueError("wirekit major does not match context/deployment.json")
-    client = wirekit.Client(credential="local-fixture-token", timeout_seconds=deployment["timeout_seconds"])
+    client = wirekit.Client(token="local-fixture-token", timeout=deployment["timeout_seconds"])
     operation = request.get("operation", "sync")
     if operation == "sync":
         pages = request.get("pages", {"": {"items": [], "next_cursor": None}})
