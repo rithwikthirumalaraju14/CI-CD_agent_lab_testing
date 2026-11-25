@@ -40,16 +40,45 @@ def duration_ms(value):
     if not match or not any(match.groups()):
         raise ValueError("unsupported ISO duration")
     hours, minutes, seconds = (Decimal(part or "0") for part in match.groups())
-    total = hours + minutes + seconds
+    total = hours * 3600 + minutes * 60 + seconds
     return int(total * 1000)
 
 
 def version_key(value):
-    match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?", value)
+    match = re.fullmatch(
+        r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
+        r"(?:-([0-9A-Za-z.-]+))?(?:\+([0-9A-Za-z.-]+))?",
+        value,
+    )
     if not match:
         raise ValueError("invalid semantic version")
-    major, minor, patch, prerelease = match.groups()
-    suffix = (1, ()) if prerelease is None else (0, tuple((0, int(part)) if part.isdigit() else (1, part) for part in prerelease.split(".")))
+    major, minor, patch, prerelease, build = match.groups()
+
+    def identifiers(text, numeric_leading_zeroes=False):
+        if text is None:
+            return None
+        parts = text.split(".")
+        if any(not re.fullmatch(r"[0-9A-Za-z-]+", part) for part in parts):
+            raise ValueError("invalid semantic version")
+        if numeric_leading_zeroes and any(
+            part.isdigit() and len(part) > 1 and part.startswith("0")
+            for part in parts
+        ):
+            raise ValueError("invalid semantic version")
+        return parts
+
+    prerelease_parts = identifiers(prerelease, numeric_leading_zeroes=True)
+    identifiers(build)
+    if prerelease_parts is None:
+        suffix = (1, ())
+    else:
+        suffix = (
+            0,
+            tuple(
+                (0, int(part)) if part.isdigit() else (1, part)
+                for part in prerelease_parts
+            ),
+        )
     return int(major), int(minor), int(patch), suffix
 
 
@@ -104,7 +133,7 @@ def run(request, root):
         total = sum(Decimal(str(row["mean_ms"])) * row["count"] for row in request["rows"])
         return {"mean_ms": str((total / count).quantize(Decimal("0.001")))}
     if operation == "releases":
-        return {"versions": sorted(request["versions"], key=str)}
+        return {"versions": sorted(request["versions"], key=version_key)}
     if operation == "digest":
         data = base64.b64decode(request["base64"], validate=True)
         return {"sha256": hashlib.sha256(data).hexdigest()}
