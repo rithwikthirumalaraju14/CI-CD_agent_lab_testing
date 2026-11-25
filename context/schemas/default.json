@@ -1,0 +1,7 @@
+{
+  "amount": "amount",
+  "description": "description",
+  "identifier": "id",
+  "revision": "revision",
+  "timestamp": "timestamp"
+}
