@@ -3,6 +3,8 @@ import re
 import time
 from pathlib import Path
 
+import pytest
+
 from buildtrace.experiments.runner import trial_id
 from buildtrace.experiments.models import AgentMode
 from buildtrace.web import create_app
@@ -10,6 +12,8 @@ from buildtrace.web import create_app
 
 def test_question_ui_requires_local_token_and_shows_real_trace(tmp_path, monkeypatch):
     source = Path("data/research-v2/experiments/dev-v2/experiment.json")
+    if not source.is_file():
+        pytest.skip("Archived development fixture is not part of the source-only branch")
     destination = tmp_path / "research-v2" / "experiments" / "dev-v2" / "experiment.json"
     destination.parent.mkdir(parents=True)
     destination.write_bytes(source.read_bytes())
