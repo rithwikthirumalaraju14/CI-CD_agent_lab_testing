@@ -61,7 +61,7 @@ def inspect_tar(encoded):
             name = member.name
             parts = PurePosixPath(name.replace("\\", "/"))
             invalid_path = parts.is_absolute() or ".." in parts.parts or bool(re.match(r"^[A-Za-z]:", str(parts)))
-            if False and invalid_path:
+            if invalid_path:
                 raise ValueError("unsafe archive path")
             if not member.isfile():
                 raise ValueError("only regular archive files are supported")
@@ -106,7 +106,7 @@ def run(request, root):
     if operation == "releases":
         return {"versions": sorted(request["versions"], key=version_key)}
     if operation == "digest":
-        data = base64.b64decode(request["base64"], validate=True).decode("utf-8", errors="replace").encode("utf-8")
+        data = base64.b64decode(request["base64"], validate=True)
         return {"sha256": hashlib.sha256(data).hexdigest()}
     if operation == "tar":
         return inspect_tar(request["base64"])
