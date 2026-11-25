@@ -1,0 +1,13 @@
+{
+  "count": 1,
+  "records": [
+    {
+      "amount": "2.50",
+      "description": "",
+      "id": "feed",
+      "revision": 1,
+      "timestamp": "2025-01-01T00:00:00Z"
+    }
+  ],
+  "total": "2.50"
+}

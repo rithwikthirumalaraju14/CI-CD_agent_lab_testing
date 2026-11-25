@@ -1,0 +1,7 @@
+{
+  "amount": "net",
+  "description": "description",
+  "identifier": "external_id",
+  "revision": "revision",
+  "timestamp": "timestamp"
+}
