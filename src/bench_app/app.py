@@ -4,7 +4,7 @@ import hashlib
 import json
 from urllib.parse import urlencode
 import wirekit
-from wirekit import sign_payload
+from .signatures import sign_payload
 
 
 def decode_response(response):
@@ -13,7 +13,7 @@ def decode_response(response):
     for parameter in content_type.split(";")[1:]:
         key, _, value = parameter.strip().partition("=")
         if key.lower() == "charset":
-            charset = value.strip('"')
+            charset = value.strip('\"')
     return json.loads(response.body.decode(charset))
 
 
