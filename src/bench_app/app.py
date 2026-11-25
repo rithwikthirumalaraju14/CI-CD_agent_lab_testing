@@ -8,7 +8,10 @@ from .signatures import sign_payload
 
 
 def decode_response(response):
-    content_type = response.headers.get("content-type", "application/json; charset=utf-8")
+    content_type = next(
+        (value for key, value in response.headers.items() if key.lower() == "content-type"),
+        "application/json; charset=utf-8",
+    )
     charset = "utf-8"
     for parameter in content_type.split(";")[1:]:
         key, _, value = parameter.strip().partition("=")
@@ -46,7 +49,7 @@ def run(request, root):
         response = wirekit.Response(request.get("status", 200), body, request.get("headers"))
         if operation == "error":
             return {"status": response.status if response is not None else 599, "error": decode_response(response)["error"]}
-        if operation == "conditional" and response.status == 204:
+        if operation == "conditional" and response.status == 304:
             return request["cached"]
         return decode_response(response)
     if operation == "sign":
@@ -67,8 +70,7 @@ def run(request, root):
         raise ValueError("retry exhausted")
     if operation == "stream":
         with client.open(request["body"].encode("utf-8")) as response:
-            pass
-        body = response.body
+            body = response.body
         return json.loads(body.decode("utf-8"))
     if operation == "query":
         return {"query": urlencode(sorted(request["params"].items()), doseq=True)}
