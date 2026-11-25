@@ -1,0 +1,13 @@
+{
+  "csv": {
+    "decimal": ".",
+    "delimiter": ",",
+    "encoding": "utf-8-sig",
+    "thousands": ""
+  },
+  "rules": {
+    "deduplicate": true,
+    "minimum": "0"
+  },
+  "schema_file": "context/schemas/default.json"
+}
