@@ -40,7 +40,7 @@ def duration_ms(value):
     if not match or not any(match.groups()):
         raise ValueError("unsupported ISO duration")
     hours, minutes, seconds = (Decimal(part or "0") for part in match.groups())
-    total = hours + minutes + seconds
+    total = hours * 3600 + minutes * 60 + seconds
     return int(total * 1000)
 
 
@@ -104,7 +104,7 @@ def run(request, root):
         total = sum(Decimal(str(row["mean_ms"])) * row["count"] for row in request["rows"])
         return {"mean_ms": str((total / count).quantize(Decimal("0.001")))}
     if operation == "releases":
-        return {"versions": sorted(request["versions"], key=str)}
+        return {"versions": sorted(request["versions"], key=version_key)}
     if operation == "digest":
         data = base64.b64decode(request["base64"], validate=True)
         return {"sha256": hashlib.sha256(data).hexdigest()}
