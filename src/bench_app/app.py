@@ -46,7 +46,7 @@ def run(request, root):
         response = wirekit.Response(request.get("status", 200), body, request.get("headers"))
         if operation == "error":
             return {"status": response.status if response is not None else 599, "error": decode_response(response)["error"]}
-        if operation == "conditional" and response.status == 204:
+        if operation == "conditional" and response.status in {204, 304}:
             return request["cached"]
         return decode_response(response)
     if operation == "sign":
@@ -67,8 +67,7 @@ def run(request, root):
         raise ValueError("retry exhausted")
     if operation == "stream":
         with client.open(request["body"].encode("utf-8")) as response:
-            pass
-        body = response.body
+            body = response.body
         return json.loads(body.decode("utf-8"))
     if operation == "query":
         return {"query": urlencode(sorted(request["params"].items()), doseq=True)}
