@@ -94,7 +94,7 @@ def run(request, root):
     if operation == "groups":
         groups = {}
         for row in request["rows"]:
-            name = row["name"]
+            name = unicodedata.normalize("NFC", row["name"])
             groups[name] = groups.get(name, 0) + row["count"]
         return {"groups": groups}
     if operation == "weighted":
