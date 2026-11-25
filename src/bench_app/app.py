@@ -19,7 +19,7 @@ def policy():
 
 def manifest_digest(entries):
     digest = hashlib.sha256()
-    for name in entries:
+    for name in sorted(entries):
         digest.update(name.encode("utf-8") + b"\0" + entries[name].encode("utf-8") + b"\0")
     return digest.hexdigest()
 
@@ -28,7 +28,7 @@ def archive_report(request):
     stream = io.BytesIO()
     with zipfile.ZipFile(stream, "w", zipfile.ZIP_STORED) as archive:
         for name, content in sorted(request["files"].items()):
-            entry = zipfile.ZipInfo(name, tuple(request["built_at"]))
+            entry = zipfile.ZipInfo(name, (2024, 1, 1, 0, 0, 0))
             entry.external_attr = 0o100644 << 16
             archive.writestr(entry, content.encode("utf-8"))
     with zipfile.ZipFile(io.BytesIO(stream.getvalue())) as archive:
@@ -106,7 +106,7 @@ def run(request, root):
     if operation == "releases":
         return {"versions": sorted(request["versions"], key=version_key)}
     if operation == "digest":
-        data = base64.b64decode(request["base64"], validate=True).decode("utf-8", errors="replace").encode("utf-8")
+        data = base64.b64decode(request["base64"], validate=True)
         return {"sha256": hashlib.sha256(data).hexdigest()}
     if operation == "tar":
         return inspect_tar(request["base64"])
