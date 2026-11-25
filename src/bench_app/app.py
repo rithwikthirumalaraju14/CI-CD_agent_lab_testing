@@ -14,7 +14,8 @@ import zipfile
 
 
 def policy():
-    return json.loads(open("src/bench_app/data/policy.json", encoding="utf-8").read())
+    resource = files("bench_app").joinpath("data/policy.json")
+    return json.loads(resource.read_text(encoding="utf-8"))
 
 
 def manifest_digest(entries):
