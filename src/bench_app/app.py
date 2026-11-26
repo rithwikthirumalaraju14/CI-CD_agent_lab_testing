@@ -45,7 +45,7 @@ def run(request, root):
         body = request.get("body", "").encode(request.get("body_encoding", "utf-8"))
         response = wirekit.Response(request.get("status", 200), body, request.get("headers"))
         if operation == "error":
-            return {"status": response.status if response else 599, "error": decode_response(response)["error"]}
+            return {"status": response.status, "error": decode_response(response)["error"]}
         if operation == "conditional" and response.status == 304:
             return request["cached"]
         return decode_response(response)
@@ -73,7 +73,7 @@ def run(request, root):
         return {"query": urlencode(sorted(request["params"].items()), doseq=True)}
     if operation == "batch":
         successes = [item["id"] for item in request["results"] if item["status"] < 400]
-        failures = []
+        failures = [item["id"] for item in request["results"] if item["status"] >= 400]
         status = 207 if successes and failures else (502 if failures else 200)
         return {"status": status, "accepted": successes, "failed": failures}
     raise ValueError("unknown operation")
