@@ -17,16 +17,16 @@ def run(request, root):
     if operation == "cache_key":
         return {"key": "deps-" + request["os"] + "-" + request["python"] + "-" + _digest(request["lockfile"])}
     if operation == "matrix_artifact":
-        name = request["platform"] + "-" + request["source_sha"] + ".whl"
-        return {"upload_name": name, "download_name": "latest.whl"}
+        name = request["platform"] + "-" + request["arch"] + "-" + request["source_sha"] + ".whl"
+        return {"upload_name": name, "download_name": name}
     if operation == "required_checks":
         changed = request["changed"]
         build_needed = any(path == "pyproject.toml" or path.startswith("ci/") or path.startswith("src/") for path in changed)
         checks = ["tests", "build"] if build_needed else ["tests"]
         return {"checks": checks, "release": all(request["status"].get(check) == "success" for check in checks)}
     if operation == "readiness":
-        healthy = request["port_open"]
-        return {"ready": healthy, "job_success": True}
+        healthy = request["port_open"] and request["health"] == "ok"
+        return {"ready": healthy, "job_success": healthy}
     if operation == "release_provenance":
         if request["tag_sha"] != request["build_sha"] or request["source_sha"] != request["build_sha"]:
             raise ValueError("release source mismatch")
