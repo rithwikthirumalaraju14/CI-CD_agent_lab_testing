@@ -1,0 +1,525 @@
+[
+  {
+    "error": null,
+    "expected": {
+      "path": "dist/a1b2c3/app.whl"
+    },
+    "name": "artifact_current",
+    "request": {
+      "name": "app.whl",
+      "operation": "artifact_path",
+      "source_sha": "a1b2c3"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "path": "dist/d4e5f6/app.whl"
+    },
+    "name": "artifact_other_sha",
+    "request": {
+      "name": "app.whl",
+      "operation": "artifact_path",
+      "source_sha": "d4e5f6"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "deploy": true
+    },
+    "name": "deploy_pass",
+    "request": {
+      "manual": false,
+      "operation": "deploy_gate",
+      "tests": "success"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "deploy": false
+    },
+    "name": "deploy_failed_tests",
+    "request": {
+      "manual": false,
+      "operation": "deploy_gate",
+      "tests": "failure"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "deploy": false
+    },
+    "name": "deploy_manual_denied",
+    "request": {
+      "approved": false,
+      "manual": true,
+      "operation": "deploy_gate",
+      "tests": "success"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "deploy": true
+    },
+    "name": "deploy_manual_approved",
+    "request": {
+      "approved": true,
+      "manual": true,
+      "operation": "deploy_gate",
+      "tests": "success"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "key": "deps-linux-3.11-e19801828875"
+    },
+    "name": "cache_linux_311",
+    "request": {
+      "lockfile": "dep==1",
+      "operation": "cache_key",
+      "os": "linux",
+      "python": "3.11"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "key": "deps-linux-3.12-e19801828875"
+    },
+    "name": "cache_linux_312",
+    "request": {
+      "lockfile": "dep==1",
+      "operation": "cache_key",
+      "os": "linux",
+      "python": "3.12"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "key": "deps-linux-3.11-a70408d9a76a"
+    },
+    "name": "cache_new_lock",
+    "request": {
+      "lockfile": "dep==2",
+      "operation": "cache_key",
+      "os": "linux",
+      "python": "3.11"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "download_name": "linux-x64-a1b2c3.whl",
+      "upload_name": "linux-x64-a1b2c3.whl"
+    },
+    "name": "matrix_linux",
+    "request": {
+      "arch": "x64",
+      "operation": "matrix_artifact",
+      "platform": "linux",
+      "source_sha": "a1b2c3"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "download_name": "windows-arm64-a1b2c3.whl",
+      "upload_name": "windows-arm64-a1b2c3.whl"
+    },
+    "name": "matrix_windows",
+    "request": {
+      "arch": "arm64",
+      "operation": "matrix_artifact",
+      "platform": "windows",
+      "source_sha": "a1b2c3"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "checks": [
+        "tests",
+        "build"
+      ],
+      "release": true
+    },
+    "name": "checks_packaging",
+    "request": {
+      "changed": [
+        "pyproject.toml"
+      ],
+      "operation": "required_checks",
+      "status": {
+        "build": "success",
+        "tests": "success"
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "checks": [
+        "tests",
+        "build"
+      ],
+      "release": false
+    },
+    "name": "checks_packaging_failed",
+    "request": {
+      "changed": [
+        "pyproject.toml"
+      ],
+      "operation": "required_checks",
+      "status": {
+        "build": "failure",
+        "tests": "success"
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "checks": [
+        "tests",
+        "build"
+      ],
+      "release": true
+    },
+    "name": "checks_ci_config",
+    "request": {
+      "changed": [
+        "ci/constraints.txt"
+      ],
+      "operation": "required_checks",
+      "status": {
+        "build": "success",
+        "tests": "success"
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "checks": [
+        "tests"
+      ],
+      "release": true
+    },
+    "name": "checks_docs",
+    "request": {
+      "changed": [
+        "docs/guide.md"
+      ],
+      "operation": "required_checks",
+      "status": {
+        "tests": "success"
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "job_success": true,
+      "ready": true
+    },
+    "name": "readiness_healthy",
+    "request": {
+      "health": "ok",
+      "operation": "readiness",
+      "port_open": true
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "job_success": false,
+      "ready": false
+    },
+    "name": "readiness_starting",
+    "request": {
+      "health": "starting",
+      "operation": "readiness",
+      "port_open": true
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "job_success": false,
+      "ready": false
+    },
+    "name": "readiness_closed",
+    "request": {
+      "health": "ok",
+      "operation": "readiness",
+      "port_open": false
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "published_sha": "aaa"
+    },
+    "name": "release_same_sha",
+    "request": {
+      "build_sha": "aaa",
+      "operation": "release_provenance",
+      "source_sha": "aaa",
+      "tag_sha": "aaa"
+    }
+  },
+  {
+    "error": "release source mismatch",
+    "expected": null,
+    "name": "release_moving_tag",
+    "request": {
+      "build_sha": "aaa",
+      "operation": "release_provenance",
+      "source_sha": "aaa",
+      "tag_sha": "bbb"
+    }
+  },
+  {
+    "error": "release source mismatch",
+    "expected": null,
+    "name": "release_wrong_source",
+    "request": {
+      "build_sha": "aaa",
+      "operation": "release_provenance",
+      "source_sha": "bbb",
+      "tag_sha": "aaa"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "lock": "sha-a"
+    },
+    "name": "same_lock",
+    "request": {
+      "build_lock": "sha-a",
+      "operation": "environment_lock",
+      "test_lock": "sha-a"
+    }
+  },
+  {
+    "error": "tested and built dependencies differ",
+    "expected": null,
+    "name": "different_lock",
+    "request": {
+      "build_lock": "sha-b",
+      "operation": "environment_lock",
+      "test_lock": "sha-a"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "deployed_sha": "aaa",
+      "digest": "hash1"
+    },
+    "name": "deploy_same_identity",
+    "request": {
+      "built_digest": "hash1",
+      "built_sha": "aaa",
+      "deployed_digest": "hash1",
+      "deployed_sha": "aaa",
+      "operation": "deploy_identity",
+      "tested_sha": "aaa"
+    }
+  },
+  {
+    "error": "source revision mismatch",
+    "expected": null,
+    "name": "deploy_wrong_sha",
+    "request": {
+      "built_digest": "hash1",
+      "built_sha": "bbb",
+      "deployed_digest": "hash1",
+      "deployed_sha": "bbb",
+      "operation": "deploy_identity",
+      "tested_sha": "aaa"
+    }
+  },
+  {
+    "error": "artifact digest mismatch",
+    "expected": null,
+    "name": "deploy_wrong_digest",
+    "request": {
+      "built_digest": "hash1",
+      "built_sha": "aaa",
+      "deployed_digest": "hash2",
+      "deployed_sha": "aaa",
+      "operation": "deploy_identity",
+      "tested_sha": "aaa"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "active_digest": "new",
+      "status": "success"
+    },
+    "name": "rollout_success",
+    "request": {
+      "candidate_digest": "new",
+      "health": "ok",
+      "last_healthy_digest": "old",
+      "operation": "rollout"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "active_digest": "old",
+      "status": "failed"
+    },
+    "name": "rollout_failure",
+    "request": {
+      "candidate_digest": "new",
+      "health": "bad",
+      "last_healthy_digest": "old",
+      "operation": "rollout"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "path": "dist/release-7/bundle.tar.gz"
+    },
+    "name": "artifact_release_sha",
+    "request": {
+      "name": "bundle.tar.gz",
+      "operation": "artifact_path",
+      "source_sha": "release-7"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "deploy": false
+    },
+    "name": "deploy_cancelled_tests",
+    "request": {
+      "approved": true,
+      "manual": true,
+      "operation": "deploy_gate",
+      "tests": "cancelled"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "key": "deps-windows-3.13-d774ee83ca31"
+    },
+    "name": "cache_windows_lock",
+    "request": {
+      "lockfile": "dep==3",
+      "operation": "cache_key",
+      "os": "windows",
+      "python": "3.13"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "download_name": "linux-arm64-a1b2c3.whl",
+      "upload_name": "linux-arm64-a1b2c3.whl"
+    },
+    "name": "matrix_second_arch",
+    "request": {
+      "arch": "arm64",
+      "operation": "matrix_artifact",
+      "platform": "linux",
+      "source_sha": "a1b2c3"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "checks": [
+        "tests",
+        "build"
+      ],
+      "release": false
+    },
+    "name": "checks_skipped_build",
+    "request": {
+      "changed": [
+        "src/bench_app/app.py"
+      ],
+      "operation": "required_checks",
+      "status": {
+        "build": "skipped",
+        "tests": "success"
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "job_success": false,
+      "ready": false
+    },
+    "name": "readiness_unhealthy",
+    "request": {
+      "health": "unhealthy",
+      "operation": "readiness",
+      "port_open": true
+    }
+  },
+  {
+    "error": "release source mismatch",
+    "expected": null,
+    "name": "release_tag_and_source",
+    "request": {
+      "build_sha": "aaa",
+      "operation": "release_provenance",
+      "source_sha": "ddd",
+      "tag_sha": "ccc"
+    }
+  },
+  {
+    "error": "tested and built dependencies differ",
+    "expected": null,
+    "name": "lock_alternate",
+    "request": {
+      "build_lock": "sha-y",
+      "operation": "environment_lock",
+      "test_lock": "sha-x"
+    }
+  },
+  {
+    "error": "source revision mismatch",
+    "expected": null,
+    "name": "deploy_both_mismatch",
+    "request": {
+      "built_digest": "hash1",
+      "built_sha": "bbb",
+      "deployed_digest": "hash2",
+      "deployed_sha": "bbb",
+      "operation": "deploy_identity",
+      "tested_sha": "aaa"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "active_digest": "stable",
+      "status": "failed"
+    },
+    "name": "rollout_failed_probe",
+    "request": {
+      "candidate_digest": "candidate",
+      "health": "timeout",
+      "last_healthy_digest": "stable",
+      "operation": "rollout"
+    }
+  }
+]
