@@ -17,6 +17,8 @@ import re
 from urllib.parse import unquote, urlsplit
 
 from buildtrace.dashboard import _recorded_cost
+from buildtrace.experiments.models import AgentMode, ExperimentSpec
+from buildtrace.experiments.runner import trial_id
 
 
 REPOSITORY = Path(__file__).resolve().parents[1]
@@ -74,6 +76,23 @@ def load() -> dict:
         records = _lines(directory / "results.jsonl")
         packets_file = directory / "packets.json"
         packets = json.loads(packets_file.read_text(encoding="utf-8")) if packets_file.is_file() else {}
+        active = []
+        spec_file = directory / "experiment.json"
+        if spec_file.is_file():
+            spec = ExperimentSpec.model_validate_json(spec_file.read_text(encoding="utf-8"))
+            identities = {trial_id(spec, task, mode, trial): (task.id, mode.value, trial + 1)
+                          for task in spec.tasks for mode in AgentMode
+                          for trial in range(spec.trials)}
+            for trial_dir in (directory / "trials").glob("run-*"):
+                if not trial_dir.is_dir() or (trial_dir / "result.json").exists() or trial_dir.name not in identities:
+                    continue
+                events = _lines(trial_dir / "trajectory.jsonl")
+                calls = [event for event in events if event.get("type") == "function_call"]
+                task_id, mode, trial = identities[trial_dir.name]
+                active.append({"id": trial_dir.name, "task_id": task_id, "mode": mode, "trial": trial,
+                               "model_calls": sum(event.get("type") == "message" and bool(event.get("usage")) for event in events),
+                               "last_action": calls[-1].get("name") if calls else "starting"})
+        active.sort(key=lambda row: (row["task_id"], row["trial"], MODES.index(row["mode"])))
         attempts = []
         for record in records:
             cost, method = _recorded_cost(record, directory)
@@ -106,7 +125,7 @@ def load() -> dict:
             })
         attempts.sort(key=lambda row: (row["task_id"], row["trial"], MODES.index(row["mode"])))
         batches.append({"number": number, "problem_ids": item["problem_ids"],
-                        "domains": item["domains"], "attempts": attempts,
+                        "domains": item["domains"], "attempts": attempts, "active": active,
                         "packets": packets,
                         "completed": len(attempts), "planned": len(item["problem_ids"]) * 3 * 3,
                         "directory": directory})
@@ -152,6 +171,15 @@ def render(data: dict, batch_number: int = 1) -> str:
         f'<article><span>{escape(LABELS[mode])}</span><strong>{sum(r["outcome"] == "solved" for r in rows)}/{len(rows)}</strong><small>verified repairs / completed attempts</small></article>'
         for mode, rows in modes.items()
     )
+    active_rows = "".join(
+        f'<tr><td><b>{escape(row["task_id"])}</b><small>Try {row["trial"]}</small></td><td>{escape(LABELS[row["mode"]])}</td>'
+        f'<td>{row["model_calls"]}</td><td>{escape(row["last_action"])}</td>'
+        f'<td><a href="/trace/{escape(row["id"], quote=True)}?batch={batch_number}">Open live trace</a></td></tr>'
+        for row in batch["active"]
+    )
+    active_section = (f'<section><h2>Agents running now · {len(batch["active"])}</h2><div class="table-wrap"><table>'
+                      f'<thead><tr><th>Problem</th><th>Agent</th><th>Model calls</th><th>Latest tool action</th><th>Trace</th></tr></thead>'
+                      f'<tbody>{active_rows}</tbody></table></div></section>') if batch["active"] else ""
     case_rows = []
     for i, task in enumerate(batch["problem_ids"], 1):
         packet = batch["packets"].get(task)
@@ -193,7 +221,7 @@ def render(data: dict, batch_number: int = 1) -> str:
 *{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,Segoe UI,sans-serif}}main{{max-width:1420px;margin:auto;padding:32px 22px 90px}}h1{{font-size:2rem;margin:.2rem 0}}h2{{font-size:1.25rem;margin:0 0 14px}}p{{color:var(--muted)}}a{{color:var(--cyan)}}.eyebrow{{color:var(--cyan);text-transform:uppercase;letter-spacing:.12em;font-size:.75rem}}.meta{{display:flex;justify-content:space-between;gap:20px;align-items:end;flex-wrap:wrap}}.meta p{{max-width:850px}}.button{{border:1px solid var(--line);border-radius:8px;padding:9px 15px;text-decoration:none}}nav{{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0}}nav a{{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px 13px;text-decoration:none}}nav .active{{border-color:var(--cyan)}}nav small{{color:var(--muted);margin-left:4px}}.cards{{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}}article,section{{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}}article span,article small{{display:block;color:var(--muted)}}article strong{{display:block;font-size:2rem}}section{{margin-top:14px}}.summary{{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}}.summary b{{display:block;font-size:1.25rem}}.summary span{{color:var(--muted)}}.compare{{display:flex;gap:25px;flex-wrap:wrap}}.compare div{{display:flex;flex-direction:column}}.compare span{{color:var(--muted)}}.table-wrap{{overflow:auto}}table{{border-collapse:collapse;width:100%}}th,td{{text-align:left;padding:10px 9px;border-bottom:1px solid var(--line);vertical-align:top}}th{{color:var(--muted);font-size:.82rem}}td small{{display:block;color:var(--muted)}}.tag,.proof{{display:inline-block;border-radius:6px;padding:2px 7px;background:#24354c}}.solved,.opened{{background:#164c45;color:var(--green)}}.unsolved,.infra-error{{background:#51313e;color:var(--red)}}.requested{{color:#ffd78d}}.none{{color:var(--muted)}}details{{min-width:110px}}details[open]{{min-width:310px}}summary{{cursor:pointer;color:var(--cyan)}}details p,details li{{font-size:.86rem;overflow-wrap:anywhere}}.empty{{text-align:center;color:var(--muted);padding:30px}}.note{{font-size:.88rem}}@media(max-width:700px){{main{{padding:18px 12px}}h1{{font-size:1.5rem}}}}
 pre{{white-space:pre-wrap;word-break:break-word;max-height:400px;overflow:auto;background:#0e1826;border:1px solid var(--line);border-radius:8px;padding:10px}}
 </style></head><body><main><div class="meta"><div><div class="eyebrow">Exploratory CI/CD agent memory study</div><h1>First 50 · batch {batch_number}</h1><p>Ten previously unseen problems, three agent modes, three attempts each. The learning corpus and scoring rules stay frozen. These exploratory batches do not establish a formal held-out verdict.</p></div><a class="button" href="/?batch={batch_number}">Refresh records</a></div>
-<nav>{nav}</nav><div class="cards">{cards}</div><section class="summary"><div><b>{batch["completed"]}/{batch["planned"]}</b><span>attempts recorded</span></div><div><b>{counts["solved"]}</b><span>verified repairs</span></div><div><b>{proof}/{len(modes["wikitrace"])}</b><span>WikiTrace attempts that opened original proof</span></div><div><b>${cost:.5f}</b><span>estimated solver token cost{f" · {unknown} unknown" if unknown else ""}</span></div></section>
+<nav>{nav}</nav><div class="cards">{cards}</div><section class="summary"><div><b>{batch["completed"]}/{batch["planned"]}</b><span>attempts recorded</span></div><div><b>{len(batch["active"])}</b><span>agents running now</span></div><div><b>{counts["solved"]}</b><span>verified repairs</span></div><div><b>{proof}/{len(modes["wikitrace"])}</b><span>WikiTrace attempts that opened original proof</span></div><div><b>${cost:.5f}</b><span>estimated solver token cost{f" · {unknown} unknown" if unknown else ""}</span></div></section>{active_section}
 <section><h2>Gain and regression</h2><div class="compare">{''.join(pair_rows)}</div><p class="note">Gain counts repairs on problems all three No-memory attempts failed. Regression counts failures on problems all three No-memory attempts solved. Mixed or incomplete baselines stay out of both denominators. A raw evidence read alone does not prove it changed a repair; independent source-to-action review is separate.</p><p class="note">Planning estimate for 90 attempts: about $0.29 in solver text tokens, based on the six-problem development average. Actual recorded usage above replaces this estimate as trials finish. GitHub Actions compute and taxes are separate.</p></section>
 <section><h2>Problems and selected insights</h2><p class="note">The same frozen insight packet is passed to Insights only and WikiTrace. No memory receives no packet. Open a packet to see its actual text and source steps.</p><div class="table-wrap"><table><thead><tr><th>No.</th><th>Problem</th><th>Area</th><th>Recorded</th><th>Insight packet</th></tr></thead><tbody>{cases}</tbody></table></div></section>
 <section><h2>Every attempt and evidence link</h2><div class="table-wrap"><table><thead><tr><th>Problem</th><th>Agent</th><th>Outcome</th><th>Original proof</th><th>Tokens</th><th>Cost estimate</th><th>Source, plans, CI</th></tr></thead><tbody>{rows_html}</tbody></table></div><p class="note">The full observable trace contains tool calls and saved plan notes. It does not expose private model chain of thought. Token cost uses the saved GPT-6 Luna price table and is an estimate, not an invoice. GitHub Actions compute is separate.</p></section>
@@ -222,7 +250,8 @@ class Handler(BaseHTTPRequestHandler):
         elif re.fullmatch(r"/trace/run-[a-z0-9]+", path.path):
             identifier = unquote(path.path.removeprefix("/trace/"))
             batch = data["batches"][number - 1]
-            if not any(row["id"] == identifier and row["trace_available"] for row in batch["attempts"]):
+            if not (any(row["id"] == identifier and row["trace_available"] for row in batch["attempts"])
+                    or any(row["id"] == identifier for row in batch["active"])):
                 self.send_error(404)
                 return
             trace = (batch["directory"] / "trials" / identifier / "trajectory.jsonl").resolve()
