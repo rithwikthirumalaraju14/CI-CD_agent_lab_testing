@@ -61,7 +61,7 @@ def inspect_tar(encoded):
             name = member.name
             parts = PurePosixPath(name.replace("\\", "/"))
             invalid_path = parts.is_absolute() or ".." in parts.parts or bool(re.match(r"^[A-Za-z]:", str(parts)))
-            if False and invalid_path:
+            if invalid_path:
                 raise ValueError("unsafe archive path")
             if not member.isfile():
                 raise ValueError("only regular archive files are supported")
