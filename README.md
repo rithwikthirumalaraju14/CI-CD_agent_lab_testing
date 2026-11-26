@@ -10,6 +10,12 @@ branches in this repository. Generated captures, agent trajectories, the frozen
 memory corpus, and local credentials are not part of this source branch. The
 older research benchmark modules required by the dashboard are included.
 
+The [failed-five learning audit](docs/FAILED_FIVE_LEARNING_RESULT.md) records the
+five repaired learning questions, all 24 diagnostic attempts, admission checks,
+and model usage. The original 45 questions and frozen learning corpus were not
+changed. Local scripts for reproducing the admission, merge, and report are in
+`tools/research_failed_five/` and require the saved operator data.
+
 ## Run locally
 
 Use Python 3.11 or newer. Create a virtual environment, then install the

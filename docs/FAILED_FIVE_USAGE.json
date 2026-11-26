@@ -1,0 +1,65 @@
+{
+  "original_learning50_corpus_sha256": "298ae33650de267b38b0fec0e57eb93abbb14907952b5d0a46d1d65f548db25f",
+  "failed_five_corpus_manifest_sha256": "dfa2b9c1156c5818c1ec1871b0f858a84cd836e363acb175e80f4e5ca257256e",
+  "tasks": {
+    "V2L06": {
+      "attempts": 3,
+      "verified_solves": 3
+    },
+    "V2L25": {
+      "attempts": 3,
+      "verified_solves": 0
+    },
+    "V2L27": {
+      "attempts": 3,
+      "verified_solves": 0
+    },
+    "V2L30": {
+      "attempts": 3,
+      "verified_solves": 0
+    },
+    "V2L45": {
+      "attempts": 3,
+      "verified_solves": 3
+    },
+    "V3L25": {
+      "attempts": 3,
+      "verified_solves": 3
+    },
+    "V3L27": {
+      "attempts": 3,
+      "verified_solves": 3
+    },
+    "V3L30": {
+      "attempts": 3,
+      "verified_solves": 3
+    }
+  },
+  "diagnostic_trials": 24,
+  "admitted_sessions": 15,
+  "insights": 31,
+  "pricing_url": "https://developers.openai.com/api/docs/models/gpt-6-luna",
+  "price_per_million_tokens_usd": {
+    "uncached_input": 0.1,
+    "cached_input": 0.01,
+    "output": 0.5
+  },
+  "solver_usage": {
+    "model_calls": 293,
+    "input_tokens": 2878827,
+    "cached_input_tokens": 2564942,
+    "output_tokens": 54757,
+    "reasoning_tokens": 10841
+  },
+  "solver_estimated_model_cost_usd": 0.084416,
+  "compiler_usage": {
+    "model_calls": 15,
+    "prompt_tokens": 310097,
+    "cached_tokens": 0,
+    "completion_tokens": 8786,
+    "reasoning_tokens": 2263
+  },
+  "compiler_estimated_model_cost_usd": 0.035403,
+  "combined_estimated_model_cost_usd": 0.119819,
+  "cost_note": "Text-token estimate from recorded usage, not an invoice; cache-write premiums and GitHub billing are not included."
+}

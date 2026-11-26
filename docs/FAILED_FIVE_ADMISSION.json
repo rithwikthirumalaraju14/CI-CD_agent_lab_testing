@@ -1,0 +1,47 @@
+{
+  "original_corpus_sha256": "298ae33650de267b38b0fec0e57eb93abbb14907952b5d0a46d1d65f548db25f",
+  "tasks": [
+    {
+      "id": "V2L06",
+      "verified_trials": 3,
+      "attempts": 3,
+      "source_results": "data\\learning50-v2-five\\experiments\\results.jsonl"
+    },
+    {
+      "id": "V2L45",
+      "verified_trials": 3,
+      "attempts": 3,
+      "source_results": "data\\learning50-v2-five\\experiments\\results.jsonl"
+    },
+    {
+      "id": "V3L25",
+      "verified_trials": 3,
+      "attempts": 3,
+      "source_results": "data\\learning-failed-v3\\experiments\\results.jsonl"
+    },
+    {
+      "id": "V3L27",
+      "verified_trials": 3,
+      "attempts": 3,
+      "source_results": "data\\learning-failed-v3\\experiments\\results.jsonl"
+    },
+    {
+      "id": "V3L30",
+      "verified_trials": 3,
+      "attempts": 3,
+      "source_results": "data\\learning-failed-v3\\experiments\\results.jsonl"
+    }
+  ],
+  "admitted_records": [
+    {
+      "path": "data\\learning50-v2-five\\experiments\\admitted-results.jsonl",
+      "count": 6,
+      "sha256": "53e66078d9384323ab9bc53aa547428fff21680ac6eaf802e8fc4c78a49f789a"
+    },
+    {
+      "path": "data\\learning-failed-v3\\experiments\\admitted-results.jsonl",
+      "count": 9,
+      "sha256": "e4579bca15a11a3dd8eadedad4ec6aedf4f856d87839fa0609569eda75ca1196"
+    }
+  ]
+}
