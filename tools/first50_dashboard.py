@@ -115,6 +115,9 @@ def load() -> dict:
                 "reasoning_tokens": record.get("reasoning_tokens", 0),
                 "cost_usd": cost, "cost_method": method,
                 "model_calls": record.get("model_calls", 0),
+                "ci_status": last_check.get("workflow_conclusion") or "not run",
+                "oracle_status": "passed" if last_check.get("oracle_passed") is True else "failed" if last_check.get("oracle_passed") is False else "not run",
+                "oracle_details": last_check.get("details") or "",
                 "ci_url": last_check.get("run_url"),
                 "oracle_url": last_check.get("oracle_run_url"),
                 "reviewed_adopted_effects": sum(
@@ -205,16 +208,17 @@ def render(data: dict, batch_number: int = 1) -> str:
         trial_rows.append(
             f'<tr><td><b>{escape(row["task_id"])}</b><small>Try {row["trial"]}</small></td>'
             f'<td>{escape(LABELS[row["mode"]])}</td><td>{_tag(row["outcome"])}</td>'
+            f'<td>CI {escape(row["ci_status"])}<small>Oracle {escape(row["oracle_status"])}</small></td>'
             f'<td><span class="proof {proof_class}">{escape(row["proof_status"])}</span><small>{row["history_requests"]} requests · {row["raw_deliveries"]} raw</small></td>'
             f'<td>{row["input_tokens"]:,} in · {row["output_tokens"]:,} out</td>'
             f'<td>{"unknown" if row["cost_usd"] is None else "$"+format(row["cost_usd"], ".5f")}</td>'
             f'<td><details><summary>Inspect</summary><p><b>Selected insights:</b> {escape(", ".join(row["packet_insight_ids"]) or "none")}</p>'
             f'<p><b>Evidence requests</b></p><ul>{evidence}</ul><p><b>Plan notes</b></p><ol>{plans}</ol>'
-            f'<p><b>Stop reason:</b> {escape(str(row["stop_reason"]))}</p><p>{sources} {trace}</p>'
+            f'<p><b>Stop reason:</b> {escape(str(row["stop_reason"]))}</p><p><b>Oracle details:</b> {escape(row["oracle_details"])}</p><p>{sources} {trace}</p>'
             f'<p><b>Independently reviewed, adopted evidence effects:</b> {row["reviewed_adopted_effects"]}</p>'
             f'</details></td></tr>'
         )
-    rows_html = "".join(trial_rows) or '<tr><td colspan="7" class="empty">No agent attempts have run in this batch.</td></tr>'
+    rows_html = "".join(trial_rows) or '<tr><td colspan="8" class="empty">No agent attempts have run in this batch.</td></tr>'
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>First 50 · Batch {batch_number} · CI/CD memory lab</title><style>
 :root{{--bg:#0d1420;--panel:#182333;--line:#314358;--text:#edf5ff;--muted:#a9bed2;--cyan:#64e3e1;--green:#6ce1bd;--red:#ff9fa8}}
@@ -224,7 +228,7 @@ pre{{white-space:pre-wrap;word-break:break-word;max-height:400px;overflow:auto;b
 <nav>{nav}</nav><div class="cards">{cards}</div><section class="summary"><div><b>{batch["completed"]}/{batch["planned"]}</b><span>attempts recorded</span></div><div><b>{len(batch["active"])}</b><span>agents running now</span></div><div><b>{counts["solved"]}</b><span>verified repairs</span></div><div><b>{proof}/{len(modes["wikitrace"])}</b><span>WikiTrace attempts that opened original proof</span></div><div><b>${cost:.5f}</b><span>estimated solver token cost{f" · {unknown} unknown" if unknown else ""}</span></div></section>{active_section}
 <section><h2>Gain and regression</h2><div class="compare">{''.join(pair_rows)}</div><p class="note">Gain counts repairs on problems all three No-memory attempts failed. Regression counts failures on problems all three No-memory attempts solved. Mixed or incomplete baselines stay out of both denominators. A raw evidence read alone does not prove it changed a repair; independent source-to-action review is separate.</p><p class="note">Planning estimate for 90 attempts: about $0.29 in solver text tokens, based on the six-problem development average. Actual recorded usage above replaces this estimate as trials finish. GitHub Actions compute and taxes are separate.</p></section>
 <section><h2>Problems and selected insights</h2><p class="note">The same frozen insight packet is passed to Insights only and WikiTrace. No memory receives no packet. Open a packet to see its actual text and source steps.</p><div class="table-wrap"><table><thead><tr><th>No.</th><th>Problem</th><th>Area</th><th>Recorded</th><th>Insight packet</th></tr></thead><tbody>{cases}</tbody></table></div></section>
-<section><h2>Every attempt and evidence link</h2><div class="table-wrap"><table><thead><tr><th>Problem</th><th>Agent</th><th>Outcome</th><th>Original proof</th><th>Tokens</th><th>Cost estimate</th><th>Source, plans, CI</th></tr></thead><tbody>{rows_html}</tbody></table></div><p class="note">The full observable trace contains tool calls and saved plan notes. It does not expose private model chain of thought. Token cost uses the saved GPT-6 Luna price table and is an estimate, not an invoice. GitHub Actions compute is separate.</p></section>
+<section><h2>Every attempt and evidence link</h2><div class="table-wrap"><table><thead><tr><th>Problem</th><th>Agent</th><th>Outcome</th><th>CI / oracle</th><th>Original proof</th><th>Tokens</th><th>Cost estimate</th><th>Source, plans, CI</th></tr></thead><tbody>{rows_html}</tbody></table></div><p class="note">A public CI success is not a verified repair when the separate oracle fails. Open Inspect for the verifier details, source excerpts, plan notes, and CI links. The full observable trace does not expose private model chain of thought. Token cost uses the saved GPT-6 Luna price table and is an estimate, not an invoice. GitHub Actions compute is separate.</p></section>
 <p class="note">Frozen plan SHA-256: {escape(data["plan"]["sha256"])} · 50 selected problems in five batches · 100 formal test problems remain untouched.</p></main></body></html>'''
 
 
