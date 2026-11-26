@@ -40,8 +40,7 @@ def duration_ms(value):
     if not match or not any(match.groups()):
         raise ValueError("unsupported ISO duration")
     hours, minutes, seconds = (Decimal(part or "0") for part in match.groups())
-    total = hours + minutes + seconds
-    return int(total * 1000)
+    return int(hours * 3_600_000 + minutes * 60_000 + seconds * 1_000)
 
 
 def version_key(value):
