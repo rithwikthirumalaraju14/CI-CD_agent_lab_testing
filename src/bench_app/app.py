@@ -8,12 +8,15 @@ from .signatures import sign_payload
 
 
 def decode_response(response):
-    content_type = response.headers.get("content-type", "application/json; charset=utf-8")
+    content_type = next(
+        (value for key, value in response.headers.items() if key.lower() == "content-type"),
+        "application/json; charset=utf-8",
+    )
     charset = "utf-8"
     for parameter in content_type.split(";")[1:]:
         key, _, value = parameter.strip().partition("=")
         if key.lower() == "charset":
-            charset = value.strip('"')
+            charset = value.strip().strip('"')
     return json.loads(response.body.decode(charset))
 
 
@@ -46,7 +49,7 @@ def run(request, root):
         response = wirekit.Response(request.get("status", 200), body, request.get("headers"))
         if operation == "error":
             return {"status": response.status if response is not None else 599, "error": decode_response(response)["error"]}
-        if operation == "conditional" and response.status == 204:
+        if operation == "conditional" and response.status == 304:
             return request["cached"]
         return decode_response(response)
     if operation == "sign":
@@ -70,7 +73,7 @@ def run(request, root):
             body = response.body
         return json.loads(body.decode("utf-8"))
     if operation == "query":
-        return {"query": urlencode(sorted(request["params"].items()), doseq=False)}
+        return {"query": urlencode(sorted(request["params"].items()), doseq=True)}
     if operation == "batch":
         successes = [item["id"] for item in request["results"] if item["status"] < 400]
         failures = [item["id"] for item in request["results"] if item["status"] >= 400]
