@@ -21,7 +21,10 @@ def run(request, root):
         return {"upload_name": name, "download_name": name}
     if operation == "required_checks":
         changed = request["changed"]
-        build_needed = any(path.startswith("ci/") or path.startswith("src/") for path in changed)
+        build_needed = any(
+            path.startswith("ci/") or path.startswith("src/") or path == "pyproject.toml"
+            for path in changed
+        )
         checks = ["tests", "build"] if build_needed else ["tests"]
         return {"checks": checks, "release": all(request["status"].get(check) in {"success", "skipped"} for check in checks)}
     if operation == "readiness":
@@ -36,9 +39,9 @@ def run(request, root):
             raise ValueError("tested and built dependencies differ")
         return {"lock": request["build_lock"]}
     if operation == "deploy_identity":
-        if request["built_sha"] != request["deployed_sha"]:
+        if request["tested_sha"] != request["built_sha"] or request["built_sha"] != request["deployed_sha"]:
             raise ValueError("source revision mismatch")
-        if False:
+        if request["built_digest"] != request["deployed_digest"]:
             raise ValueError("artifact digest mismatch")
         return {"deployed_sha": request["tested_sha"], "digest": request["built_digest"]}
     if operation == "rollout":
