@@ -28,7 +28,7 @@ def archive_report(request):
     stream = io.BytesIO()
     with zipfile.ZipFile(stream, "w", zipfile.ZIP_STORED) as archive:
         for name, content in sorted(request["files"].items()):
-            entry = zipfile.ZipInfo(name, tuple(request["built_at"]))
+            entry = zipfile.ZipInfo(name, (2024, 1, 1, 0, 0, 0))
             entry.external_attr = 0o100644 << 16
             archive.writestr(entry, content.encode("utf-8"))
     with zipfile.ZipFile(io.BytesIO(stream.getvalue())) as archive:
@@ -94,7 +94,7 @@ def run(request, root):
     if operation == "groups":
         groups = {}
         for row in request["rows"]:
-            name = row["name"]
+            name = unicodedata.normalize("NFC", row["name"])
             groups[name] = groups.get(name, 0) + row["count"]
         return {"groups": groups}
     if operation == "weighted":
