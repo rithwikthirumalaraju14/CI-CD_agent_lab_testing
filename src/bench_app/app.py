@@ -70,7 +70,7 @@ def run(request, root):
             body = response.body
         return json.loads(body.decode("utf-8"))
     if operation == "query":
-        return {"query": urlencode(sorted(request["params"].items()), doseq=False)}
+        return {"query": urlencode(sorted(request["params"].items()), doseq=True)}
     if operation == "batch":
         successes = [item["id"] for item in request["results"] if item["status"] < 400]
         failures = [item["id"] for item in request["results"] if item["status"] >= 400]
