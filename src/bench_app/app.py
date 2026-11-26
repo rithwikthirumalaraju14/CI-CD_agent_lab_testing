@@ -55,7 +55,7 @@ def rows_from(request, root, config):
 def amount(value, config):
     value = str(value).replace(config["csv"]["thousands"], "") if config["csv"]["thousands"] else str(value)
     value = value.replace(config["csv"]["decimal"], ".")
-    return Decimal(value).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")
+    return Decimal(value).quantize(Decimal("0.01"), rounding=ROUND_HALF_EVEN)
 
 
 def normalize(row, aliases, config):
@@ -78,7 +78,7 @@ def run(request, root):
     records = [row for row in records if Decimal(row["amount"]) >= Decimal(str(minimum))]
     if request.get("after"):
         watermark = timestamp(request["after"])
-        records = [row for row in records if timestamp(row["timestamp"]) >= watermark]
+        records = [row for row in records if timestamp(row["timestamp"]) > watermark]
     if config["rules"]["deduplicate"]:
         latest = {}
         for row in records:
