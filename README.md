@@ -21,3 +21,23 @@ and local experiment data.
 See `docs/EXPERIMENTS.md` and `docs/RESEARCH_PROTOCOL.md` for the runner and
 research controls. The four-problem question UI is exploratory; held-out exam
 results require the pinned protocol and verifier evidence.
+
+## First-50 exploratory dashboard
+
+`tools/first50_dashboard.py` is a separate, read-only operator view for the
+five predeclared batches of ten problems. It reads the saved batch plan,
+packets, results, and observable trajectories. For each attempt it shows
+whether WikiTrace opened an original source excerpt, which insights were
+selected, saved plan notes, CI links, tokens, estimated cost, Gain, and
+Regression. It does not launch agents or expose private model reasoning.
+
+Run it with the plan and result directories from your local experiment:
+
+```powershell
+python tools/first50_dashboard.py --plan-root path/to/exploratory-first50-v1 --run-root path/to/data/exploratory-first50/experiments --port 8777
+```
+
+Open `http://127.0.0.1:8777/` and refresh to read newly saved results. The
+dashboard is local only; the plan and result files remain outside this source
+branch. The batch comparison is exploratory and does not replace independent
+review of whether historical evidence changed an adopted repair.
