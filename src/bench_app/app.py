@@ -14,7 +14,7 @@ def decode_response(response):
         key, _, value = parameter.strip().partition("=")
         if key.lower() == "charset":
             charset = value.strip('"')
-    return json.loads(response.body.decode("utf-8"))
+    return json.loads(response.body.decode(charset))
 
 
 def retry_delay(value, now):
@@ -29,7 +29,7 @@ def run(request, root):
     deployment = json.loads((root / "context/deployment.json").read_text(encoding="utf-8"))
     if int(wirekit.__version__.split(".")[0]) != deployment["wire_major"]:
         raise ValueError("wirekit major does not match context/deployment.json")
-    client = wirekit.Client(credential="local-fixture-token", timeout_seconds=deployment["timeout_seconds"])
+    client = wirekit.Client("local-fixture-token", timeout=deployment["timeout_seconds"])
     operation = request.get("operation", "sync")
     if operation == "sync":
         pages = request.get("pages", {"": {"items": [], "next_cursor": None}})
@@ -45,7 +45,7 @@ def run(request, root):
         body = request.get("body", "").encode(request.get("body_encoding", "utf-8"))
         response = wirekit.Response(request.get("status", 200), body, request.get("headers"))
         if operation == "error":
-            return {"status": response.status if response is not None else 599, "error": decode_response(response)["error"]}
+            return {"status": response.status, "error": decode_response(response)["error"]}
         if operation == "conditional" and response.status == 304:
             return request["cached"]
         return decode_response(response)
