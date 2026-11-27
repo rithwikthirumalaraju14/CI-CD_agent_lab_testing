@@ -1,0 +1,1 @@
+A release manifest signed by the build job verifies for the usual ASCII fixture. A partner manifest with nested fields and non-ASCII text fails verification despite containing the same values. Restore compatibility with existing signatures.
