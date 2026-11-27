@@ -1,0 +1,16 @@
+[
+  {
+    "accepted": [],
+    "failed": [
+      "web"
+    ],
+    "status": 502
+  },
+  {
+    "accepted": [
+      "api"
+    ],
+    "failed": [],
+    "status": 200
+  }
+]

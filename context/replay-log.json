@@ -1,0 +1,12 @@
+{
+  "accepted": [
+    "api"
+  ],
+  "billing": "one call per submitted event",
+  "rejected": [
+    "web"
+  ],
+  "retryable": [
+    "jobs"
+  ]
+}

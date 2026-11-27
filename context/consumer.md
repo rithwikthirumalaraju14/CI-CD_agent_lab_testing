@@ -1,0 +1,1 @@
+Only new or previously retryable services may be dispatched. Previously accepted or permanently rejected service IDs stay in the receipt. Count calls for this invocation, including zero calls. Preserve service order in each list. Only 5xx is retryable. The budget includes the first call.

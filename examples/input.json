@@ -1,0 +1,27 @@
+{
+  "max_attempts": 2,
+  "services": [
+    {
+      "events": [
+        200
+      ],
+      "id": "api",
+      "prior": "new"
+    },
+    {
+      "events": [
+        503,
+        201
+      ],
+      "id": "jobs",
+      "prior": "new"
+    },
+    {
+      "events": [
+        422
+      ],
+      "id": "web",
+      "prior": "new"
+    }
+  ]
+}
