@@ -1,0 +1,98 @@
+[
+  {
+    "error": null,
+    "expected": {
+      "digest": "A"
+    },
+    "name": "older_revision_finishes_late",
+    "request": {
+      "completed_jobs": [
+        {
+          "arch": "arm64",
+          "digest": "A",
+          "platform": "linux",
+          "revision": "b4"
+        },
+        {
+          "arch": "arm64",
+          "digest": "C",
+          "platform": "linux",
+          "revision": "b3"
+        },
+        {
+          "arch": "x64",
+          "digest": "B",
+          "platform": "linux",
+          "revision": "b4"
+        }
+      ],
+      "deployment": {
+        "arch": "arm64",
+        "platform": "linux",
+        "revision": "b4"
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "digest": "D"
+    },
+    "name": "windows_same_arch",
+    "request": {
+      "completed_jobs": [
+        {
+          "arch": "arm64",
+          "digest": "D",
+          "platform": "windows",
+          "revision": "b4"
+        },
+        {
+          "arch": "x64",
+          "digest": "B",
+          "platform": "linux",
+          "revision": "b4"
+        },
+        {
+          "arch": "arm64",
+          "digest": "A",
+          "platform": "linux",
+          "revision": "b4"
+        }
+      ],
+      "deployment": {
+        "arch": "arm64",
+        "platform": "windows",
+        "revision": "b4"
+      }
+    }
+  },
+  {
+    "error": "requested artifact absent",
+    "expected": {
+      "digest": "C"
+    },
+    "name": "requested_revision_unpublished",
+    "request": {
+      "completed_jobs": [
+        {
+          "arch": "arm64",
+          "digest": "A",
+          "platform": "linux",
+          "revision": "b4"
+        },
+        {
+          "arch": "x64",
+          "digest": "B",
+          "platform": "linux",
+          "revision": "b4"
+        }
+      ],
+      "deployment": {
+        "arch": "arm64",
+        "platform": "linux",
+        "revision": "b3"
+      }
+    }
+  }
+]
