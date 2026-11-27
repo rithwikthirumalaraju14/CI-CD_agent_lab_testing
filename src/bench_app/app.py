@@ -4,7 +4,7 @@ import hashlib
 import json
 from urllib.parse import urlencode
 import wirekit
-from wirekit import sign_payload
+from .signatures import sign_payload
 
 
 def decode_response(response):
@@ -13,7 +13,7 @@ def decode_response(response):
     for parameter in content_type.split(";")[1:]:
         key, _, value = parameter.strip().partition("=")
         if key.lower() == "charset":
-            charset = value.strip('"')
+            charset = value.strip('\"')
     return json.loads(response.body.decode(charset))
 
 
@@ -62,9 +62,9 @@ def run(request, root):
         max_attempts = request.get("max_attempts", deployment["max_attempts"])
         for attempt in range(1, max_attempts + 1):
             status = plan[min(attempt - 1, len(plan) - 1)]
-            if status < 500:
+            if not 500 <= status < 600:
                 return {"status": status, "attempts": attempt}
-        return {"status": status, "attempts": max_attempts}
+        raise ValueError("retry exhausted")
     if operation == "stream":
         with client.open(request["body"].encode("utf-8")) as response:
             body = response.body
