@@ -1,0 +1,174 @@
+[
+  {
+    "error": null,
+    "expected": {
+      "active_digest": "stable",
+      "status": "rejected"
+    },
+    "name": "same_source_wrong_artifact",
+    "request": {
+      "build": {
+        "digest": "digest-C",
+        "source": "source-C"
+      },
+      "candidate": {
+        "digest": "rebuilt",
+        "source": "source-C",
+        "tag": "prod"
+      },
+      "health": "ok",
+      "ledger": [
+        {
+          "digest": "old",
+          "kind": "promoted",
+          "tag": "prod"
+        },
+        {
+          "digest": "prior",
+          "kind": "built",
+          "tag": "prod"
+        },
+        {
+          "digest": "stable",
+          "kind": "promoted",
+          "tag": "previous"
+        },
+        {
+          "digest": "shadow",
+          "kind": "built",
+          "tag": "prod"
+        }
+      ],
+      "tested_source": "source-C"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "active_digest": "stable",
+      "status": "rejected"
+    },
+    "name": "untested_build",
+    "request": {
+      "build": {
+        "digest": "digest-C",
+        "source": "source-C"
+      },
+      "candidate": {
+        "digest": "digest-C",
+        "source": "source-C",
+        "tag": "prod"
+      },
+      "health": "ok",
+      "ledger": [
+        {
+          "digest": "old",
+          "kind": "promoted",
+          "tag": "prod"
+        },
+        {
+          "digest": "prior",
+          "kind": "built",
+          "tag": "prod"
+        },
+        {
+          "digest": "stable",
+          "kind": "promoted",
+          "tag": "previous"
+        },
+        {
+          "digest": "shadow",
+          "kind": "built",
+          "tag": "prod"
+        }
+      ],
+      "tested_source": "other"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "active_digest": "stable",
+      "status": "rejected"
+    },
+    "name": "offered_other_source",
+    "request": {
+      "build": {
+        "digest": "digest-C",
+        "source": "source-C"
+      },
+      "candidate": {
+        "digest": "digest-C",
+        "source": "elsewhere",
+        "tag": "prod"
+      },
+      "health": "ok",
+      "ledger": [
+        {
+          "digest": "old",
+          "kind": "promoted",
+          "tag": "prod"
+        },
+        {
+          "digest": "prior",
+          "kind": "built",
+          "tag": "prod"
+        },
+        {
+          "digest": "stable",
+          "kind": "promoted",
+          "tag": "previous"
+        },
+        {
+          "digest": "shadow",
+          "kind": "built",
+          "tag": "prod"
+        }
+      ],
+      "tested_source": "source-C"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "active_digest": "stable",
+      "status": "failed"
+    },
+    "name": "last_promoted_over_tag",
+    "request": {
+      "build": {
+        "digest": "digest-C",
+        "source": "source-C"
+      },
+      "candidate": {
+        "digest": "digest-C",
+        "source": "source-C",
+        "tag": "prod"
+      },
+      "health": "bad",
+      "ledger": [
+        {
+          "digest": "old",
+          "kind": "promoted",
+          "tag": "prod"
+        },
+        {
+          "digest": "prior",
+          "kind": "built",
+          "tag": "prod"
+        },
+        {
+          "digest": "stable",
+          "kind": "promoted",
+          "tag": "previous"
+        },
+        {
+          "digest": "shadow",
+          "kind": "built",
+          "tag": "prod"
+        }
+      ],
+      "tested_source": "source-C"
+    }
+  }
+]
