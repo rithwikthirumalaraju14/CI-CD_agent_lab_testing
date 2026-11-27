@@ -1,0 +1,21 @@
+{
+  "completed_jobs": [
+    {
+      "arch": "arm64",
+      "digest": "A",
+      "platform": "linux",
+      "revision": "b4"
+    },
+    {
+      "arch": "x64",
+      "digest": "B",
+      "platform": "linux",
+      "revision": "b4"
+    }
+  ],
+  "deployment": {
+    "arch": "arm64",
+    "platform": "linux",
+    "revision": "b4"
+  }
+}

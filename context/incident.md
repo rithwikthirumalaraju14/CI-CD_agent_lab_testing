@@ -1,0 +1,1 @@
+All Linux matrix jobs pass. When two architectures build from the same commit, staging sometimes deploys the other architecture's binary. Repair artifact selection and show that reversing job completion order still deploys the requested build.
