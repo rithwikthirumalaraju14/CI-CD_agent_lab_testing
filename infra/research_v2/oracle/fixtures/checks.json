@@ -1,0 +1,24 @@
+[
+  {
+    "error": null,
+    "expected": {
+      "channel": "stable",
+      "rollout": 20
+    },
+    "name": "installed_rollout_policy",
+    "request": {
+      "fields": [
+        "rollout",
+        "channel"
+      ]
+    }
+  },
+  {
+    "error": null,
+    "expected": {},
+    "name": "empty_projection",
+    "request": {
+      "fields": []
+    }
+  }
+]
