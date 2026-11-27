@@ -1,0 +1,84 @@
+[
+  {
+    "error": null,
+    "expected": {
+      "gate": "hold",
+      "means_ms": {
+        "É": "4.000",
+        "é": "7.000"
+      }
+    },
+    "name": "canonical_spellings_case_distinct",
+    "request": {
+      "limit_ms": "6",
+      "shards": [
+        {
+          "count": 2,
+          "mean_ms": "6",
+          "region": "É"
+        },
+        {
+          "count": 1,
+          "mean_ms": "0",
+          "region": "É"
+        },
+        {
+          "count": 1,
+          "mean_ms": "7",
+          "region": "é"
+        }
+      ]
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "gate": "hold",
+      "means_ms": {
+        "r": "1.000",
+        "s": null
+      }
+    },
+    "name": "submillisecond_threshold",
+    "request": {
+      "limit_ms": "1",
+      "shards": [
+        {
+          "count": 3,
+          "mean_ms": "1.0004",
+          "region": "r"
+        },
+        {
+          "count": 0,
+          "mean_ms": "80",
+          "region": "s"
+        }
+      ]
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "gate": "promote",
+      "means_ms": {
+        "r": "4.000"
+      }
+    },
+    "name": "threshold_equality",
+    "request": {
+      "limit_ms": "4",
+      "shards": [
+        {
+          "count": 2,
+          "mean_ms": "2",
+          "region": "r"
+        },
+        {
+          "count": 1,
+          "mean_ms": "8",
+          "region": "r"
+        }
+      ]
+    }
+  }
+]
