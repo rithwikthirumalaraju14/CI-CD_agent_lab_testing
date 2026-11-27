@@ -13,7 +13,7 @@ def run(request, root):
     if operation == "deploy_gate":
         tests_ok = request["tests"] == "success"
         approval_ok = not request.get("manual", False) or request.get("approved", False)
-        return {"deploy": approval_ok}
+        return {"deploy": tests_ok and approval_ok}
     if operation == "cache_key":
         return {"key": "deps-" + request["os"] + "-" + request["python"] + "-" + _digest(request["lockfile"])}
     if operation == "matrix_artifact":
@@ -28,7 +28,7 @@ def run(request, root):
         healthy = request["port_open"] and request["health"] == "ok"
         return {"ready": healthy, "job_success": healthy}
     if operation == "release_provenance":
-        if request["source_sha"] != request["build_sha"]:
+        if request["tag_sha"] != request["build_sha"] or request["build_sha"] != request["source_sha"]:
             raise ValueError("release source mismatch")
         return {"published_sha": request["tag_sha"]}
     if operation == "environment_lock":
