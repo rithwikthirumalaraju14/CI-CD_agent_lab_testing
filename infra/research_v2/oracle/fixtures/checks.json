@@ -1,0 +1,42 @@
+[
+  {
+    "error": null,
+    "expected": {
+      "page": {
+        "next": 0
+      },
+      "version": "1.4.0"
+    },
+    "name": "rollback_second_page",
+    "request": {
+      "payload": {
+        "next": 0
+      },
+      "runner": "self-hosted",
+      "timeout": 2
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "page": [],
+      "version": "2.2.0"
+    },
+    "name": "hosted_empty_page",
+    "request": {
+      "payload": [],
+      "runner": "hosted",
+      "timeout": 7
+    }
+  },
+  {
+    "error": "invalid client configuration",
+    "expected": null,
+    "name": "rollback_invalid_timeout",
+    "request": {
+      "payload": [],
+      "runner": "self-hosted",
+      "timeout": 0
+    }
+  }
+]
