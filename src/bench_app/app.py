@@ -4,7 +4,7 @@ import hashlib
 import json
 from urllib.parse import urlencode
 import wirekit
-from wirekit import sign_payload
+from .signatures import sign_payload
 
 
 def decode_response(response):
@@ -64,7 +64,7 @@ def run(request, root):
             status = plan[min(attempt - 1, len(plan) - 1)]
             if status < 500:
                 return {"status": status, "attempts": attempt}
-        return {"status": status, "attempts": max_attempts}
+        raise ValueError("retry exhausted")
     if operation == "stream":
         with client.open(request["body"].encode("utf-8")) as response:
             body = response.body
