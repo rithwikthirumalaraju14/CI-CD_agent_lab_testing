@@ -20,8 +20,14 @@ def decode_response(response):
 def retry_delay(value, now):
     try:
         return max(0, int(value))
-    except ValueError:
-        return 0
+    except (TypeError, ValueError):
+        try:
+            retry_at = parsedate_to_datetime(value)
+            if retry_at.tzinfo is None:
+                retry_at = retry_at.replace(tzinfo=timezone.utc)
+            return max(0, int((retry_at.astimezone(timezone.utc) - now).total_seconds()))
+        except (TypeError, ValueError, OverflowError):
+            return 0
 
 
 def run(request, root):
@@ -66,8 +72,7 @@ def run(request, root):
         raise ValueError("retry exhausted")
     if operation == "stream":
         with client.open(request["body"].encode("utf-8")) as response:
-            pass
-        body = response.body
+            body = response.body
         return json.loads(body.decode("utf-8"))
     if operation == "query":
         return {"query": urlencode(sorted(request["params"].items()), doseq=True)}
