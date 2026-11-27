@@ -1,9 +1,21 @@
 def run(request, root):
     build = request["build"]
     candidate = request["candidate"]
-    deployed = [event for event in request["ledger"] if event["kind"] in ("promoted", "built")]
-    active = deployed[-1]["digest"]
-    if not (request["tested_source"] == build["source"] == candidate["source"]):
+    active = next(
+        (
+            event["digest"]
+            for event in reversed(request["ledger"])
+            if event["kind"] == "promoted"
+        ),
+        None,
+    )
+
+    # A matching source revision is not sufficient: the deployed artifact
+    # must be the exact artifact that passed CI.
+    if not (
+        request["tested_source"] == build["source"] == candidate["source"]
+        and build["digest"] == candidate["digest"]
+    ):
         return {"status": "rejected", "active_digest": active}
     if request["health"] != "ok":
         return {"status": "failed", "active_digest": active}
