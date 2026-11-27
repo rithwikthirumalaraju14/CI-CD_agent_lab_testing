@@ -66,7 +66,7 @@ def inspect_tar(encoded):
             if not member.isfile():
                 raise ValueError("only regular archive files are supported")
             canonical = str(parts)
-            if name in seen:
+            if canonical in seen:
                 raise ValueError("duplicate archive member")
             seen.add(canonical)
             members.append(canonical)
