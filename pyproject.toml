@@ -15,7 +15,7 @@ dev = ["pytest>=8.3,<9", "build>=1.2,<2"]
 
 [tool.bench.package]
 wheel_include = ["*.py", "*.json"]
-sdist_include = ["*.toml", "ci/*.py", "src/bench_app/*.py", "src/bench_app/data/*.toml"]
+sdist_include = ["*.toml", "ci/*.py", "src/bench_app/*.py", "src/bench_app/data/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
