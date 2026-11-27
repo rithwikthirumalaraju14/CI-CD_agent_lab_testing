@@ -1,0 +1,31 @@
+{
+  "error": null,
+  "expected": {
+    "gate": "promote",
+    "means_ms": {
+      "QUÉBEC": "1.000",
+      "Québec": "4.000"
+    }
+  },
+  "name": "archived",
+  "request": {
+    "limit_ms": "5",
+    "shards": [
+      {
+        "count": 2,
+        "mean_ms": "2",
+        "region": "Québec"
+      },
+      {
+        "count": 1,
+        "mean_ms": "8",
+        "region": "Québec"
+      },
+      {
+        "count": 2,
+        "mean_ms": "1",
+        "region": "QUÉBEC"
+      }
+    ]
+  }
+}

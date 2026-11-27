@@ -1,0 +1,15 @@
+{
+  "limit_ms": "200",
+  "shards": [
+    {
+      "count": 1,
+      "mean_ms": "900",
+      "region": "Ouest"
+    },
+    {
+      "count": 9,
+      "mean_ms": "100",
+      "region": "Ouest"
+    }
+  ]
+}

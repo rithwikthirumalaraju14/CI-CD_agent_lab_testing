@@ -1,0 +1,1 @@
+The canary gate disagrees with the previous release. A reporting migration changed the canary decision for a release with the same latency measurements. Each regional shard passes its own checks. Repair the combined report so the release controller makes the same decision as the accepted report, including when a region contributes zero samples.
