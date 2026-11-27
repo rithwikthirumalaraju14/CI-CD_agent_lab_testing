@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "content": "release\n",
+      "mode": 493,
+      "name": "plugin.txt"
+    },
+    {
+      "content": "ok",
+      "mode": 384,
+      "name": "assets/banner"
+    }
+  ],
+  "runner_clock": [
+    2025,
+    7,
+    2,
+    9,
+    10,
+    0
+  ]
+}

@@ -1,0 +1,1 @@
+The rebuilt ZIP extracts correctly but fails promotion. Staging extracts exactly the expected files from a rebuilt plug-in bundle. Promotion rejects it because its archive digest differs from the approved bundle. Repair the packer so a clean rebuild on a different runner reproduces the approved ZIP byte for byte.
