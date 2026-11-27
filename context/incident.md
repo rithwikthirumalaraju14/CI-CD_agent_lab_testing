@@ -1,0 +1,1 @@
+After a rollback, the hosted smoke test passes, but the self-hosted runner fails when it creates the wirekit client. Both supported versions install successfully. Repair the self-hosted job while keeping the hosted job green.

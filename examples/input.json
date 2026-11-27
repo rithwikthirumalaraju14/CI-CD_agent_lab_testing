@@ -1,0 +1,7 @@
+{
+  "payload": [
+    "blue"
+  ],
+  "runner": "hosted",
+  "timeout": 3
+}
