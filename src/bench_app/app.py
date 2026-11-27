@@ -9,7 +9,7 @@ def run(request, root):
     exec(zipimporter(str(wheel)).get_code("wirekit"), sdk.__dict__)
     timeout = request["timeout"]
     if sdk.__version__.startswith("1."):
-        client = sdk.Client(credential="fixture", timeout_seconds=timeout)
+        client = sdk.Client("fixture", timeout=timeout)
     else:
         client = sdk.Client(credential="fixture", timeout_seconds=timeout)
     page = client.page({"0": request["payload"]}, 0)
