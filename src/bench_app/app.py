@@ -60,12 +60,16 @@ def inspect_tar(encoded):
         for member in archive.getmembers():
             name = member.name
             parts = PurePosixPath(name.replace("\\", "/"))
-            invalid_path = parts.is_absolute() or ".." in parts.parts or bool(re.match(r"^[A-Za-z]:", str(parts)))
-            if False and invalid_path:
+            canonical = str(parts)
+            invalid_path = (
+                parts.is_absolute()
+                or ".." in parts.parts
+                or bool(re.match(r"^[A-Za-z]:", canonical))
+            )
+            if invalid_path:
                 raise ValueError("unsafe archive path")
             if not member.isfile():
                 raise ValueError("only regular archive files are supported")
-            canonical = str(parts)
             if canonical in seen:
                 raise ValueError("duplicate archive member")
             seen.add(canonical)
