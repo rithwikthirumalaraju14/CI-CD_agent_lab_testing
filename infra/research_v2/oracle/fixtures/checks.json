@@ -1,0 +1,64 @@
+[
+  {
+    "error": null,
+    "expected": {
+      "action": "rollback",
+      "attempts": 3
+    },
+    "name": "success_beyond_retry_budget",
+    "request": {
+      "responses": [
+        503,
+        503,
+        503,
+        200
+      ],
+      "runner": "green"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "action": "promote",
+      "attempts": 1
+    },
+    "name": "immediate_success",
+    "request": {
+      "responses": [
+        200,
+        503
+      ],
+      "runner": "green"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "action": "rollback",
+      "attempts": 3
+    },
+    "name": "true_exhaustion",
+    "request": {
+      "responses": [
+        503,
+        503,
+        503
+      ],
+      "runner": "blue"
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "action": "rollback",
+      "attempts": 1
+    },
+    "name": "short_probe_log",
+    "request": {
+      "responses": [
+        503
+      ],
+      "runner": "green"
+    }
+  }
+]
