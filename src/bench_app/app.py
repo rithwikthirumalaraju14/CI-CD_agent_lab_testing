@@ -101,12 +101,15 @@ def run(request, root):
         count = sum(row["count"] for row in request["rows"])
         if not count:
             return {"mean_ms": None}
-        total = sum(Decimal(str(row["mean_ms"])) for row in request["rows"])
-        return {"mean_ms": str((total / len(request["rows"])).quantize(Decimal("0.001")))}
+        total = sum(
+            Decimal(str(row["mean_ms"])) * Decimal(str(row["count"]))
+            for row in request["rows"]
+        )
+        return {"mean_ms": str((total / Decimal(str(count))).quantize(Decimal("0.001")))}
     if operation == "releases":
         return {"versions": sorted(request["versions"], key=version_key)}
     if operation == "digest":
-        data = base64.b64decode(request["base64"], validate=True).decode("utf-8", errors="replace").encode("utf-8")
+        data = base64.b64decode(request["base64"], validate=True)
         return {"sha256": hashlib.sha256(data).hexdigest()}
     if operation == "tar":
         return inspect_tar(request["base64"])
