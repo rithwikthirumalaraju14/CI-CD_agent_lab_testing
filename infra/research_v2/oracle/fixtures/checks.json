@@ -1,0 +1,89 @@
+[
+  {
+    "error": null,
+    "expected": {
+      "zip_b64": "UEsDBBQAAAAAAAAAIVhH3dx5AgAAAAIAAAANAAAAYXNzZXRzL2Jhbm5lcm9rUEsDBBQAAAAAAAAAIVhJLU9RCAAAAAgAAAAKAAAAcGx1Z2luLnR4dHJlbGVhc2UKUEsBAhQDFAAAAAAAAAAhWEfd3HkCAAAAAgAAAA0AAAAAAAAAAAAAAKQBAAAAAGFzc2V0cy9iYW5uZXJQSwECFAMUAAAAAAAAACFYSS1PUQgAAAAIAAAACgAAAAAAAAAAAAAApAEtAAAAcGx1Z2luLnR4dFBLBQYAAAAAAgACAHMAAABdAAAAAAA="
+    },
+    "name": "runner_clock_changes",
+    "request": {
+      "entries": [
+        {
+          "content": "ok",
+          "mode": 384,
+          "name": "assets/banner"
+        },
+        {
+          "content": "release\n",
+          "mode": 493,
+          "name": "plugin.txt"
+        }
+      ],
+      "runner_clock": [
+        2026,
+        9,
+        6,
+        4,
+        2,
+        0
+      ]
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "zip_b64": "UEsDBBQAAAAAAAAAIVjxhmx6AwAAAAMAAAABAAAAYW9uZVBLAwQUAAAAAAAAACFYAAAAAAAAAAAAAAAAAQAAAGJQSwECFAMUAAAAAAAAACFY8YZsegMAAAADAAAAAQAAAAAAAAAAAAAApAEAAAAAYVBLAQIUAxQAAAAAAAAAIVgAAAAAAAAAAAAAAAABAAAAAAAAAAAAAACkASIAAABiUEsFBgAAAAACAAIAXgAAAEEAAAAAAA=="
+    },
+    "name": "different_permissions",
+    "request": {
+      "entries": [
+        {
+          "content": "one",
+          "mode": 256,
+          "name": "a"
+        },
+        {
+          "content": "",
+          "mode": 511,
+          "name": "b"
+        }
+      ],
+      "runner_clock": [
+        2025,
+        7,
+        2,
+        9,
+        10,
+        0
+      ]
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "zip_b64": "UEsDBBQAAAAAAAAAIVj/hLHSAwAAAAMAAAABAAAAWuWkp1BLAwQUAAAIAAAAACFYYr/C4wIAAAACAAAABwAAAHQvw6l0w6nOlFBLAQIUAxQAAAAAAAAAIVj/hLHSAwAAAAMAAAABAAAAAAAAAAAAAACkAQAAAABaUEsBAhQDFAAACAAAAAAhWGK/wuMCAAAAAgAAAAcAAAAAAAAAAAAAAKQBIgAAAHQvw6l0w6lQSwUGAAAAAAIAAgBkAAAASQAAAAAA"
+    },
+    "name": "unicode_path_and_payload",
+    "request": {
+      "entries": [
+        {
+          "content": "Δ",
+          "mode": 493,
+          "name": "t/été"
+        },
+        {
+          "content": "大",
+          "mode": 493,
+          "name": "Z"
+        }
+      ],
+      "runner_clock": [
+        2025,
+        7,
+        2,
+        9,
+        10,
+        0
+      ]
+    }
+  }
+]
