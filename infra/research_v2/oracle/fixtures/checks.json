@@ -1,0 +1,63 @@
+[
+  {
+    "error": null,
+    "expected": {
+      "digest": "b345303dbc08ba1cb442e5993f963c8a2a585af659fcc15a1835f3fc07f364de"
+    },
+    "name": "reordered_files",
+    "request": {
+      "files": {
+        "cfg": "v1",
+        "readme": "ok"
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "digest": "629c2f14f654f026086f2aefe1855533d0897f49df86a19073be17b237361b09"
+    },
+    "name": "prefix_collision_left",
+    "request": {
+      "files": {
+        "ab": "c"
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "digest": "aa795aa4bbb6117911ef062e271bcb05ccfd58ea439da7d46a44e3a3fcefa790"
+    },
+    "name": "prefix_collision_right",
+    "request": {
+      "files": {
+        "a": "bc"
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "digest": "b94ec42907f11f8d6559599c8943794b6711bb1747894a18649c6b7cbb45e4e9"
+    },
+    "name": "distinct_unicode_names",
+    "request": {
+      "files": {
+        "empty": "",
+        "é": "X",
+        "é": "x"
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "name": "empty_release",
+    "request": {
+      "files": {}
+    }
+  }
+]
