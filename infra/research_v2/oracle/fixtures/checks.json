@@ -1,0 +1,126 @@
+[
+  {
+    "error": null,
+    "expected": {
+      "accepted": [],
+      "calls": {
+        "new": 1,
+        "old": 0
+      },
+      "failed": [
+        "old",
+        "new"
+      ],
+      "status": 502
+    },
+    "name": "all_permanent",
+    "request": {
+      "max_attempts": 2,
+      "services": [
+        {
+          "events": [
+            200
+          ],
+          "id": "old",
+          "prior": "rejected"
+        },
+        {
+          "events": [
+            401,
+            200
+          ],
+          "id": "new",
+          "prior": "new"
+        }
+      ]
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "accepted": [
+        "b"
+      ],
+      "calls": {
+        "a": 2,
+        "b": 0
+      },
+      "failed": [
+        "a"
+      ],
+      "status": 207
+    },
+    "name": "late_after_budget",
+    "request": {
+      "max_attempts": 2,
+      "services": [
+        {
+          "events": [
+            503,
+            503,
+            200
+          ],
+          "id": "a",
+          "prior": "retryable"
+        },
+        {
+          "events": [
+            500
+          ],
+          "id": "b",
+          "prior": "accepted"
+        }
+      ]
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "accepted": [
+        "a"
+      ],
+      "calls": {
+        "a": 0,
+        "b": 0
+      },
+      "failed": [
+        "b"
+      ],
+      "status": 207
+    },
+    "name": "terminal_replay",
+    "request": {
+      "max_attempts": 2,
+      "services": [
+        {
+          "events": [
+            200
+          ],
+          "id": "b",
+          "prior": "rejected"
+        },
+        {
+          "events": [
+            500
+          ],
+          "id": "a",
+          "prior": "accepted"
+        }
+      ]
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "accepted": [],
+      "calls": {},
+      "failed": [],
+      "status": 200
+    },
+    "name": "empty_rollout",
+    "request": {
+      "max_attempts": 2,
+      "services": []
+    }
+  }
+]
