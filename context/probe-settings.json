@@ -1,0 +1,8 @@
+{
+  "blue": {
+    "max_attempts": 3
+  },
+  "green": {
+    "retries": 2
+  }
+}

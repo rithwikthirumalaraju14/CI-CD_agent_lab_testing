@@ -1,0 +1,1 @@
+The same rollout script runs on two runners. One reports success when readiness arrives on the last allowed probe. The other rolls back even though its log shows a healthy final response. Repair the workflow so it handles both late success and genuine exhaustion correctly.
