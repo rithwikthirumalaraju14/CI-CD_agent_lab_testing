@@ -1,0 +1,47 @@
+[
+  {
+    "error": null,
+    "expected": {
+      "signature": "6fca8a157156e9183e3ee9a8440ccaf13a06a693137d69f028bba6a20c01459b"
+    },
+    "name": "reordered_partner_manifest",
+    "request": {
+      "manifest": {
+        "a": 2,
+        "z": [
+          {
+            "a": "ü",
+            "β": "東京"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "signature": "013fc18f10321db7541276a147c99e8086d59ebb77cf34ed55bbbe2b7015995c"
+    },
+    "name": "array_order_is_signed",
+    "request": {
+      "manifest": {
+        "items": [
+          "b",
+          "a"
+        ]
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "signature": "1ef3e9269ee2a09b436e2def62ee488662dfaf18eaf168480c1290f704640a15"
+    },
+    "name": "quoted_text",
+    "request": {
+      "manifest": {
+        "label": "a\"b"
+      }
+    }
+  }
+]
