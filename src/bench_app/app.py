@@ -19,7 +19,7 @@ def policy():
 
 def manifest_digest(entries):
     digest = hashlib.sha256()
-    for name in entries:
+    for name in sorted(entries):
         digest.update(name.encode("utf-8") + b"\0" + entries[name].encode("utf-8") + b"\0")
     return digest.hexdigest()
 
