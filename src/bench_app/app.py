@@ -6,4 +6,4 @@ def run(request, root):
     target = identity(request["deployment"])
     if target not in published:
         raise ValueError("requested artifact absent")
-    return {"digest": published[next(reversed(published))]}
+    return {"digest": published[target]}
