@@ -1,0 +1,25 @@
+{
+  "build": {
+    "digest": "digest-C",
+    "source": "source-C"
+  },
+  "candidate": {
+    "digest": "digest-C",
+    "source": "source-C",
+    "tag": "prod"
+  },
+  "health": "bad",
+  "ledger": [
+    {
+      "digest": "digest-A",
+      "kind": "promoted",
+      "tag": "prod"
+    },
+    {
+      "digest": "digest-B",
+      "kind": "built",
+      "tag": "prod"
+    }
+  ],
+  "tested_source": "source-C"
+}

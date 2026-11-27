@@ -1,0 +1,1 @@
+Ledger events are chronological. A built receipt records successful CI. A promoted receipt records the artifact that served after a successful deployment. Tags are reusable. Provenance refusal has status rejected and does not activate a candidate. An actual unhealthy rollout has status failed.

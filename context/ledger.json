@@ -1,0 +1,12 @@
+[
+  {
+    "digest": "digest-A",
+    "kind": "promoted",
+    "tag": "prod"
+  },
+  {
+    "digest": "digest-B",
+    "kind": "built",
+    "tag": "prod"
+  }
+]
