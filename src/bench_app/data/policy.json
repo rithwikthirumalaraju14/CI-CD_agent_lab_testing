@@ -1,0 +1,5 @@
+{
+  "channel": "stable",
+  "rollout": 20,
+  "schema": 3
+}

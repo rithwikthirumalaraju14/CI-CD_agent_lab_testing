@@ -1,0 +1,1 @@
+CI builds a wheel and a source distribution from the same commit. The wheel passes its smoke test, but a downstream clean install cannot load policy.json. Repair the release so both installation paths work outside the checkout.
