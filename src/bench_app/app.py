@@ -8,7 +8,10 @@ from .signatures import sign_payload
 
 
 def decode_response(response):
-    content_type = response.headers.get("content-type", "application/json; charset=utf-8")
+    content_type = next(
+        (value for key, value in response.headers.items() if key.lower() == "content-type"),
+        "application/json; charset=utf-8",
+    )
     charset = "utf-8"
     for parameter in content_type.split(";")[1:]:
         key, _, value = parameter.strip().partition("=")
@@ -38,7 +41,7 @@ def run(request, root):
             page = client.page(pages, cursor)
             items.extend(page["items"])
             cursor = page.get("next_cursor")
-            if not cursor:
+            if cursor is None:
                 break
         return {"items": items, "count": len(items)}
     if operation in {"decode", "error", "conditional"}:
@@ -62,7 +65,7 @@ def run(request, root):
         max_attempts = request.get("max_attempts", deployment["max_attempts"])
         for attempt in range(1, max_attempts + 1):
             status = plan[min(attempt - 1, len(plan) - 1)]
-            if status < 500:
+            if not 500 <= status < 600:
                 return {"status": status, "attempts": attempt}
         raise ValueError("retry exhausted")
     if operation == "stream":
