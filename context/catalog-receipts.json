@@ -1,0 +1,28 @@
+[
+  {
+    "error": null,
+    "expected": {
+      "digest": "b345303dbc08ba1cb442e5993f963c8a2a585af659fcc15a1835f3fc07f364de"
+    },
+    "name": "release_manifest_replay",
+    "request": {
+      "files": {
+        "cfg": "v1",
+        "readme": "ok"
+      }
+    }
+  },
+  {
+    "error": null,
+    "expected": {
+      "digest": "29d3d740feeb403eea7aba1ed1cb0ad2a7a57e1d7f6d63be48eaf9b28e5decfb"
+    },
+    "name": "catalog_receipt_unicode",
+    "request": {
+      "files": {
+        "z": "東京",
+        "été": ""
+      }
+    }
+  }
+]

@@ -1,0 +1,1 @@
+The release checksum changed. After a manifest writer migration, two rebuilds agree with each other, but the release catalog rejects their checksum. The files and their contents match the accepted release. Repair the writer so the catalog accepts rebuilt manifests, including a release with accented filenames and an empty file.
