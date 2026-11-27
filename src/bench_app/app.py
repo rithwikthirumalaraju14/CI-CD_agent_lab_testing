@@ -13,7 +13,7 @@ def decode_response(response):
     for parameter in content_type.split(";")[1:]:
         key, _, value = parameter.strip().partition("=")
         if key.lower() == "charset":
-            charset = value.strip('"')
+            charset = value.strip('\"')
     return json.loads(response.body.decode(charset))
 
 
@@ -38,7 +38,7 @@ def run(request, root):
             page = client.page(pages, cursor)
             items.extend(page["items"])
             cursor = page.get("next_cursor")
-            if not cursor:
+            if cursor is None:
                 break
         return {"items": items, "count": len(items)}
     if operation in {"decode", "error", "conditional"}:
