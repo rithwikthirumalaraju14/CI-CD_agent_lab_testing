@@ -38,7 +38,7 @@ def run(request, root):
             page = client.page(pages, cursor)
             items.extend(page["items"])
             cursor = page.get("next_cursor")
-            if not cursor:
+            if cursor is None:
                 break
         return {"items": items, "count": len(items)}
     if operation in {"decode", "error", "conditional"}:
@@ -72,8 +72,10 @@ def run(request, root):
     if operation == "query":
         return {"query": urlencode(sorted(request["params"].items()), doseq=True)}
     if operation == "batch":
-        successes = [item["id"] for item in request["results"] if item["status"] < 400]
-        failures = []
+        successes, failures = [], []
+        for item in request["results"]:
+            destination = successes if item["status"] < 400 else failures
+            destination.append(item["id"])
         status = 207 if successes and failures else (502 if failures else 200)
         return {"status": status, "accepted": successes, "failed": failures}
     raise ValueError("unknown operation")
